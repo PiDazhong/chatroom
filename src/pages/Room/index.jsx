@@ -18,8 +18,6 @@ const Room = () => {
 
   const { roomId, userId: nickId } = useUrlParams();
 
-  // 当前的 websocket 实例
-  const ws = useRef(null);
   // 当前输入框的值
   const [inputValue, setInputValue] = useState('');
   // 当前聊天室的聊天记录
@@ -32,6 +30,22 @@ const Room = () => {
   const [nickName, setNickName] = useState('');
   // loading
   const [loading, setLoading] = useState(true);
+
+  // 当前的 websocket 实例
+  const ws = useRef(null);
+  // 聊天记录容器dom
+  const logsContanierRef = useRef(null);
+
+  // 滚动到最底部
+  const scrollToBottom = () => {
+    if (logsContanierRef.current) {
+      // 延迟执行 scrollToBottom 确保容器高度已更新
+      setTimeout(() => {
+        logsContanierRef.current.scrollTop =
+          logsContanierRef.current.scrollHeight;
+      }, 0);
+    }
+  };
 
   // 校验 合法性
   const validate = async () => {
@@ -114,12 +128,14 @@ const Room = () => {
       const { type, data } = item;
       if (type === 'logs') {
         setLogs(data);
+        scrollToBottom();
       }
       if (type === 'members') {
         setOnlineMembers(data);
       }
       if (type === 'message') {
         setLogs((prev) => [...prev, data]);
+        scrollToBottom();
       }
     }
   };
@@ -195,11 +211,11 @@ const Room = () => {
 
   // 渲染 聊天记录
   const renderLog = () => {
-    return logs.map((item) => {
+    return logs.map((item, idx) => {
       const { log_user_name, log_content, log_time } = item;
       if (log_user_name === 'system') {
         return (
-          <div key={log_time} className="room-logs-item">
+          <div key={`${log_time}_${idx}`} className="room-logs-item">
             <div className="room-logs-item-system">
               <div className="room-logs-item-system-content">{log_content}</div>
             </div>
@@ -207,7 +223,7 @@ const Room = () => {
         );
       }
       return (
-        <div key={log_time} className="room-logs-item">
+        <div key={`${log_time}_${idx}`} className="room-logs-item">
           <div className="room-logs-item-head">
             <div className="room-logs-item-head-user">{log_user_name}</div>
             <div className="room-logs-item-head-time">{log_time}</div>
@@ -256,7 +272,9 @@ const Room = () => {
                 <img src="/exit.png" />
               </div>
             </div>
-            <div className="room-logs">{renderLog()}</div>
+            <div className="room-logs" ref={logsContanierRef}>
+              {renderLog()}
+            </div>
           </div>
 
           <div className="room-members">{renderMember()}</div>

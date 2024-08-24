@@ -137,7 +137,6 @@ function setupWebSocket(server) {
       const messageParse = JSON.parse(message.toString('utf-8'));
       const { content, sendUserName, sendUserId, sendRoom, type, sendTime } =
         messageParse;
-      console.log('message', message, messageParse);
       // 如果发过来的是消息，那么直接广播出去即可
       if (type === 'message') {
         // 将发送来的消息存入数据库
