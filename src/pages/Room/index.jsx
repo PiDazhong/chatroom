@@ -251,9 +251,26 @@ const Room = () => {
     });
   };
 
+  // 渲染 顶部 用户
+  const renderTopMember = () => {
+    return onlineMembers.map((item) => {
+      const { user_name, head_num } = item;
+      return (
+        <div key={user_name} className="room-members-item">
+          <Tooltip title={user_name}>
+            <div className="room-members-item-head one-img">
+              <img src={`/head_${head_num || 1}.png`} />
+            </div>
+          </Tooltip>
+        </div>
+      );
+    });
+  };
+
   return (
     <div className="room-page">
       <div className="room-page-container">
+        <div className="room-top-members">{renderTopMember()}</div>
         <div className="room-main">
           <div className="room-logs-container">
             <div className="room-logs-container-title">
@@ -276,7 +293,6 @@ const Room = () => {
               {renderLog()}
             </div>
           </div>
-
           <div className="room-members">{renderMember()}</div>
         </div>
         <div className="room-user">

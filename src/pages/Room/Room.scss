@@ -19,6 +19,41 @@
     height: 860px;
     border-radius: 4px;
 
+    .room-top-members {
+      display: none;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0px 20px;
+      height: 50px;
+      overflow-x: scroll;
+      border: 1px solid var(--black15);
+      margin-bottom: 10px;
+
+      .room-members-item {
+        line-height: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+
+        .room-members-item-head {
+          width: 32px;
+          height: 32px;
+          overflow: hidden;
+          border-radius: 50%;
+          border: 1px solid var(--orange80);
+          margin-right: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .room-members-item-name {
+          font-size: 14px;
+          color: var(--orange);
+        }
+      }
+    }
+
     .room-main {
       height: 530px;
       display: flex;
@@ -273,6 +308,10 @@
 
     .room-page-container {
       width: calc(100% - 40px);
+
+      .room-top-members {
+        display: flex;
+      }
 
       .room-main {
         height: 400px;
