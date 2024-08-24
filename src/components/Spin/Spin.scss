@@ -1,0 +1,103 @@
+$ballSize: 10px; //小球的大小
+
+.custom-spin {
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  .custom-spin-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    .dot-item {
+      background-color: transparent;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      perspective: 70px;
+      transform-style: preserve-3d;
+
+      .before,
+      .after {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        border-radius: 50%;
+        content: '';
+      }
+
+      .before {
+        background-color: var(--blue-press-1);
+        top: -100%;
+      }
+
+      .after {
+        background-color: var(--blue-press-2);
+        top: 100%;
+      }
+
+      @keyframes blackMove {
+        0% {
+          animation-timing-function: ease-in;
+        }
+        13% {
+          transform: translate3d(0, 50%, calc(#{$ballSize} / 2));
+          animation-timing-function: ease-in;
+        }
+        25% {
+          transform: translate3d(0, 100%, $ballSize);
+          animation-timing-function: ease-out;
+        }
+        38% {
+          transform: translate3d(0, 150%, calc(#{$ballSize} / 2));
+          animation-timing-function: ease-out;
+        }
+        50% {
+          transform: translate3d(0, 200%, 0);
+          animation-timing-function: ease-in;
+        }
+        63% {
+          transform: translate3d(0, 150%, -calc(#{$ballSize} / 2));
+          animation-timing-function: ease-in;
+        }
+        75% {
+          transform: translate3d(0, 100%, -$ballSize);
+          animation-timing-function: ease-out;
+        }
+      }
+
+      @keyframes whiteMove {
+        0% {
+          animation-timing-function: ease-in;
+        }
+        13% {
+          transform: translate3d(0, -50%, -calc(#{$ballSize} / 2));
+          animation-timing-function: ease-in;
+        }
+        25% {
+          transform: translate3d(0, -100%, -$ballSize);
+          animation-timing-function: ease-out;
+        }
+        38% {
+          transform: translate3d(0, -150%, -calc(#{$ballSize} / 2));
+          animation-timing-function: ease-out;
+        }
+        50% {
+          transform: translate3d(0, -200%, 0);
+          animation-timing-function: ease-in;
+        }
+        63% {
+          transform: translate3d(0, -150%, calc(#{$ballSize} / 2));
+          animation-timing-function: ease-in;
+        }
+        75% {
+          transform: translate3d(0, -100%, $ballSize);
+          animation-timing-function: ease-out;
+        }
+      }
+    }
+  }
+}

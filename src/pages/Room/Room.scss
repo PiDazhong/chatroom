@@ -1,0 +1,162 @@
+.custom-spin {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.room-page {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+
+  .room-page-container {
+    width: 870px;
+    height: 900px;
+    border-radius: 4px;
+
+    .room-main {
+      height: 580px;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+
+      .room-logs-container {
+        height: 590px;
+        width: 660px;
+        display: flex;
+        flex-direction: column;
+        border: 2px solid var(--black15);
+
+        .room-logs-container-title {
+          height: 40px;
+          width: calc(100% - 20px);
+          border-bottom: 1px solid var(--black15);
+          background-color: var(--white);
+          line-height: 40px;
+          padding-left: 20px;
+          font-size: 14px;
+          font-weight: bold;
+          color: var(--black85);
+        }
+      }
+
+      .room-logs {
+        width: 620px;
+        height: 550px;
+        padding: 10px 20px 20px 20px;
+        overflow: scroll;
+        position: relative;
+      }
+
+      .room-logs-item {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+
+        .room-logs-item-head {
+          display: flex;
+          font-size: 13px;
+          line-height: 30px;
+
+          .room-logs-item-head-user {
+            color: var(--black65);
+          }
+
+          .room-logs-item-head-time {
+            color: var(--black45);
+            margin-left: 20px;
+          }
+        }
+
+        .room-logs-item-content {
+          color: var(--black85);
+        }
+      }
+
+      .room-members {
+        width: 150px;
+        height: 570px;
+        border: 2px solid var(--black15);
+        padding: 10px 20px;
+        overflow: scroll;
+
+        .room-members-item {
+          line-height: 48px;
+          height: 48px;
+          display: flex;
+          align-items: center;
+
+          .room-members-item-head {
+            width: 32px;
+            height: 32px;
+            overflow: hidden;
+            border-radius: 50%;
+            border: 2px solid var(--orange80);
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          img {
+            width: 32px;
+            height: 32px;
+          }
+
+          .room-members-item-name {
+            color: var(--black65);
+          }
+        }
+      }
+    }
+
+    .room-user {
+      height: 180px;
+      padding: 10px 0px;
+      margin-top: 6px;
+
+      .room-user-info {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        line-height: 40px;
+        height: 40px;
+        color: var(--black85);
+
+        .room-user-info-label {
+          margin-right: 6px;
+          color: var(--black65);
+        }
+      }
+
+      .room-user-input {
+        textarea {
+          border: 1px solid var(--black15);
+          border-radius: 2px;
+        }
+      }
+
+      .room-user-button {
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        button {
+          border-radius: 2px;
+          height: 28px;
+          margin-right: 20px;
+
+          &:last-child {
+            margin-right: 0;
+          }
+        }
+      }
+    }
+  }
+}

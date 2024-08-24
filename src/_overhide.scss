@@ -1,0 +1,38 @@
+.ant-message {
+  .ant-message-notice .ant-message-notice-content {
+    border-radius: 2px;
+    background-color: #ffffff;
+  }
+
+  .ant-message-notice-success,
+  .ant-message-notice-error,
+  .ant-message-notice-warning {
+    .ant-message-notice-content {
+      border-radius: 2px;
+      height: 36px;
+      padding: 0px 20px 0 16px;
+      background-color: var(--white) !important;
+      box-shadow: 0 6px 16px 0 var(--black10), 0 3px 6px -4px var(--black10),
+        0 9px 28px 8px var(--black05);
+    }
+
+    .ant-message-success,
+    .ant-message-error,
+    .ant-message-warning {
+      display: flex;
+      align-items: center;
+      height: 36px;
+
+      .anticon-check-circle,
+      .anticon-close-circle,
+      .anticon-exclamation-circle {
+        font-size: 14px;
+      }
+
+      span {
+        color: var(--black85);
+        font-size: 12px;
+      }
+    }
+  }
+}

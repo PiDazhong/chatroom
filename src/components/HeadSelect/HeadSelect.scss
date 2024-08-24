@@ -1,0 +1,27 @@
+.head-select-el {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .head-item {
+    border-radius: 50%;
+    border: 2px solid var(--white);
+    width: 26px;
+    height: 26px;
+    overflow: hidden;
+    margin-right: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 30px;
+      height: 30px;
+    }
+
+    &.active {
+      border: 2px solid var(--purple);
+    }
+  }
+}
