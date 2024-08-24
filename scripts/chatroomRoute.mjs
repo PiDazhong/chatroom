@@ -314,4 +314,25 @@ router.post('/getRoomInfo', async (req, res) => {
   }
 });
 
+// 根据 userId 查询 用户信息
+router.post('/getUserInfo', async (req, res) => {
+  const { userId } = req.body;
+  try {
+    const userTable = `${DB_NAME}.chat_room_user_table`;
+
+    // 查看是否存在当前的房间
+    const querySql = `SELECT user_name FROM ${userTable} where user_id='${userId}' `;
+
+    const userName = (await runSql(querySql))[0]?.user_name;
+    res.send({
+      success: true,
+      data: userName,
+    });
+  } catch (e) {
+    res.send({
+      error: '查询报错',
+    });
+  }
+});
+
 export { setupWebSocket, router };

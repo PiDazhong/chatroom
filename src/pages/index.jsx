@@ -50,6 +50,14 @@ const Home = () => {
 
   // 根据 聊天室 和 当前昵称  登录
   const handleLogin = async () => {
+    if (!nickName) {
+      message.warning('昵称不能为空');
+      return;
+    }
+    if (!chatroomName) {
+      message.warning('聊天室名称不能为空');
+      return;
+    }
     try {
       const { success, data } = await fetchRequest(
         '/mysql/createChatroom',
@@ -72,7 +80,7 @@ const Home = () => {
           }),
         );
         // 跳转到聊天室
-        navigate(`/room?roomId=${chatroomId}`);
+        navigate(`/room?roomId=${chatroomId}&userId=${nickId}`);
       }
     } catch (e) {
       // message.error('创建失败');
