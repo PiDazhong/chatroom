@@ -172,6 +172,7 @@ function setupWebSocket(server) {
       await runSql(
         `update ${userTable} set user_status='offline', room_ids='' where user_id='${nickId}' `,
       );
+      const onlineMembers = await getOnlineMembersByRoomId(roomId);
       // 告诉大家 xxx 离开了房间
       broadcastToRoom(
         roomIdClients,

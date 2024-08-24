@@ -160,3 +160,28 @@
     }
   }
 }
+
+/* 如果屏幕宽度小于 900px，则宽度改为100% */
+@media (max-width: 900px) {
+  .room-page {
+    width: 100%;
+
+    .room-page-container {
+      width: calc(100% - 40px);
+
+      .room-main {
+        .room-logs-container {
+          width: 100%;
+        }
+
+        .room-members {
+          display: none;
+        }
+
+        .room-logs {
+          width: calc(100% - 40px);
+        }
+      }
+    }
+  }
+}

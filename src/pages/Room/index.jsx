@@ -36,6 +36,8 @@ const Room = () => {
   // 房间名
   const [roomName, setRoomName] = useState('');
 
+  console.log('onlineMembers', onlineMembers);
+
   // 校验 合法性
   const validate = async () => {
     setLoading(true);
