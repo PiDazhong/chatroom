@@ -165,13 +165,20 @@
 @media (max-width: 900px) {
   .room-page {
     width: 100%;
+    height: calc(100vh - 20px);
+    display: flex;
+    align-items: flex-start;
+    padding-top: 20px;
 
     .room-page-container {
       width: calc(100% - 40px);
 
       .room-main {
+        height: 400px;
+
         .room-logs-container {
           width: 100%;
+          height: 410px;
         }
 
         .room-members {
