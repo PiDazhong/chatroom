@@ -13,6 +13,7 @@
   align-items: center;
   justify-content: center;
   font-size: 14px;
+  background-color: var(--white);
 
   .room-page-container {
     width: 870px;
@@ -28,6 +29,7 @@
       overflow-x: scroll;
       border: 1px solid var(--black15);
       margin-bottom: 10px;
+      box-shadow: inset 5px 5px 10px var(--black04);
 
       .room-members-item {
         line-height: 48px;
@@ -71,7 +73,8 @@
           height: 40px;
           width: calc(100% - 20px);
           border-bottom: 1px solid var(--black15);
-          background-color: var(--white);
+          background-color: transparent;
+          box-shadow: inset 5px 5px 10px var(--black04);
           line-height: 40px;
           padding-left: 20px;
           font-size: 14px;
@@ -107,6 +110,7 @@
         padding: 10px 20px 20px 20px;
         overflow: scroll;
         position: relative;
+        box-shadow: inset 0px 5px 5px var(--black10);
       }
 
       .room-logs-item {
@@ -162,6 +166,7 @@
         border: 1px solid var(--black15);
         padding: 10px 20px;
         overflow: scroll;
+        box-shadow: inset 5px 5px 10px var(--black04);
 
         .room-members-item {
           line-height: 48px;
@@ -241,6 +246,8 @@
         textarea {
           border: 1px solid var(--black15);
           border-radius: 2px;
+          background-color: transparent;
+          box-shadow: inset 0px 2px 5px var(--black10);
         }
 
         .send-icon {
