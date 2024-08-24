@@ -68,6 +68,9 @@ function setupWebSocket(server) {
   wss.on('connection', async (ws, req) => {
     const logTable = `${DB_NAME}.chat_room_log_table`;
     const userTable = `${DB_NAME}.chat_room_user_table`;
+
+    const nowTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
+
     const query = parseUrlParams(req.url);
 
     // 判断 roomId 是否存在
@@ -96,8 +99,17 @@ function setupWebSocket(server) {
     const user_name = userInfo?.user_name;
     const roomIds = userInfo?.room_ids?.split(',').filter(Boolean) || [];
     const newRoomIds = _.uniq([...roomIds, roomId]).join(',');
+    const joinInMessage = `${user_name} 进入了房间`;
     await runSql(
       `update ${userTable} set user_status='online', room_ids='${newRoomIds}' where user_id='${nickId}' `,
+    );
+    // 进入房间的信息也入库吧
+    await runSql(
+      `insert into ${logTable} 
+        (log_id, log_content, log_time, log_room_id, log_user_id, log_user_name) 
+        values 
+        ('${roomId}_${nickId}_${nowTime}', '${joinInMessage}', '${nowTime}', '${roomId}', '${nickId}', 'system')
+      `,
     );
     const onlineMembers = await getOnlineMembersByRoomId(roomId);
     broadcastToRoom(
@@ -108,7 +120,7 @@ function setupWebSocket(server) {
           type: 'message',
           data: {
             log_user_name: 'system',
-            log_content: `${user_name} 进入了房间`,
+            log_content: joinInMessage,
           },
         },
         // 通知大家，聊天室的信息变更了，这里只返回在线的人
@@ -169,8 +181,18 @@ function setupWebSocket(server) {
 
     // 监听客户端断开连接
     ws.on('close', async () => {
+      const exitTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
+      const exitMessage = `${user_name} 离开了房间`;
       await runSql(
         `update ${userTable} set user_status='offline', room_ids='' where user_id='${nickId}' `,
+      );
+      // 离开房间的信息也入库吧
+      await runSql(
+        `insert into ${logTable} 
+        (log_id, log_content, log_time, log_room_id, log_user_id, log_user_name) 
+        values 
+        ('${roomId}_${nickId}_${exitTime}', '${exitMessage}', '${exitTime}', '${roomId}', '${nickId}', 'system')
+      `,
       );
       const onlineMembers = await getOnlineMembersByRoomId(roomId);
       // 告诉大家 xxx 离开了房间
@@ -182,7 +204,7 @@ function setupWebSocket(server) {
             type: 'message',
             data: {
               log_user_name: 'system',
-              log_content: `${user_name} 离开了房间`,
+              log_content: exitMessage,
             },
           },
           // 通知大家，聊天室的信息变更了，这里只返回在线的人
