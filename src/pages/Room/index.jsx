@@ -126,6 +126,7 @@ const Room = () => {
     const parseData = JSON.parse(dataStr);
     for (let item of parseData) {
       const { type, data } = item;
+      console.log('data', data);
       if (type === 'logs') {
         setLogs(data);
         scrollToBottom();
@@ -302,6 +303,12 @@ const Room = () => {
               onChange={(e) => setInputValue(e.target.value)}
               rows={4}
               placeholder="请输入聊天内容"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage();
+                }
+              }}
             />
             <div className="send-icon one-img" onClick={() => sendMessage()}>
               <img src="/send.png" />

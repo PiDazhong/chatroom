@@ -98,6 +98,7 @@
 
         .room-logs-item-content {
           color: var(--black85);
+          white-space: pre-wrap;
         }
 
         .room-logs-item-system {
@@ -115,6 +116,7 @@
             border-radius: 10px;
             color: var(--brand);
             line-height: 20px;
+            white-space: pre-wrap;
           }
         }
       }
