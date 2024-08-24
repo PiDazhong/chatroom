@@ -126,7 +126,6 @@ const Room = () => {
     const parseData = JSON.parse(dataStr);
     for (let item of parseData) {
       const { type, data } = item;
-      console.log('data', data);
       if (type === 'logs') {
         setLogs(data);
         scrollToBottom();
@@ -163,7 +162,7 @@ const Room = () => {
     // 连接错误
     ws.current.onerror = (error) => {
       console.log('WebSocket 连接错误', error);
-      message.error({ content: '聊天室连接错误', key: 'success-failed' });
+      // message.error({ content: '聊天室连接错误', key: 'success-failed' });
     };
 
     return () => {
