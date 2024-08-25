@@ -198,7 +198,8 @@ const Room = () => {
         content: '',
         sendUserName: nickName,
         sendUserId: nickId,
-        sendRoom: roomId,
+        sendRoomId: roomId,
+        sendRoomName: roomName,
         sendTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
         type: 'query-logs',
       };
