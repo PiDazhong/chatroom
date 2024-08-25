@@ -13,7 +13,6 @@ dist-ssr
 *.local
 chatroom
 
-scripts2
 scripts/mysql.mjs
 scripts/constsES5.mjs
 scripts/constsStatic.mjs
