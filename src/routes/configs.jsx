@@ -3,6 +3,7 @@
  */
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import LogsTable from 'pages/LogsTable';
 import Room from 'pages/Room';
 import Home from 'pages/index';
 
@@ -24,6 +25,12 @@ const getRouterConfigs = () => {
       name: '用户管理',
       path: '/room',
       element: <Room />,
+    },
+    {
+      key: 'logs',
+      name: '用户管理',
+      path: '/logs',
+      element: <LogsTable />,
     },
   ];
 };

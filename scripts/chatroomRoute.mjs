@@ -39,22 +39,30 @@ function broadcastToRoom(clients, message) {
   });
 }
 
+// 查询在指定聊天室的 在线的人
 const getOnlineMembersByRoomId = async (roomId) => {
   const userTable = `${DB_NAME}.chat_room_user_table`;
-  // 查询在线的人 且 在指定聊天室的人
   const queryOnlineMembers = `SELECT user_name, head_num FROM ${userTable} where room_ids like '%${roomId}%' and user_status='online'`;
   const onlineMembers = (await runSql(queryOnlineMembers)) || [];
 
   return onlineMembers;
 };
 
+// 查询 指定聊天室 聊天记录  最近 200 条
 const getLogsByRoomId = async (roomId) => {
   const logTable = `${DB_NAME}.chat_room_log_table`;
 
-  // 查询聊天记录  最近 200 条
   const queryLogs = `SELECT log_user_name, log_content, log_time FROM ${logTable} where log_room_id='${roomId}' order by log_time limit 200`;
   const logs = await runSql(queryLogs);
   return logs;
+};
+
+// 查询 聊天室的name
+const getRoomNameByRoomId = async (roomId) => {
+  const roomTable = `${DB_NAME}.chat_room_table`;
+  const queryRoomName = `SELECT room_name FROM ${roomTable} where room_id='${roomId}'`;
+  const roomName = (await runSql(queryRoomName))[0]?.room_name;
+  return roomName;
 };
 
 function setupWebSocket(server) {
@@ -70,6 +78,7 @@ function setupWebSocket(server) {
     const userTable = `${DB_NAME}.chat_room_user_table`;
 
     const nowTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
+    const now = dayjs().valueOf();
 
     const query = parseUrlParams(req.url);
 
@@ -93,6 +102,9 @@ function setupWebSocket(server) {
     const roomIdClients = rooms.get(roomId);
     const getUserClients = (nickId) => userClientsMap.get(nickId);
 
+    // 当前 房间name
+    const roomName = await getRoomNameByRoomId(roomId);
+
     // 更新 用户 的状态  为 online
     const queryRoomIdsSql = `SELECT user_id, user_name, room_ids FROM ${userTable} where user_id='${nickId}'`;
     const userInfo = (await runSql(queryRoomIdsSql))[0];
@@ -106,9 +118,9 @@ function setupWebSocket(server) {
     // 进入房间的信息也入库吧
     await runSql(
       `insert into ${logTable} 
-        (log_id, log_content, log_time, log_room_id, log_user_id, log_user_name) 
+        (log_id, log_content, log_time, log_room_id, log_room_name, log_user_id, log_user_name) 
         values 
-        ('${roomId}_${nickId}_${nowTime}', '${joinInMessage}', '${nowTime}', '${roomId}', '${nickId}', 'system')
+        ('${now}', '${joinInMessage}', '${nowTime}', '${roomId}', '${roomName}', '${nickId}', 'system')
       `,
     );
     const onlineMembers = await getOnlineMembersByRoomId(roomId);
@@ -135,16 +147,24 @@ function setupWebSocket(server) {
     ws.on('message', async (message) => {
       // 根据消息种类 进行 不同的操作
       const messageParse = JSON.parse(message.toString('utf-8'));
-      const { content, sendUserName, sendUserId, sendRoom, type, sendTime } =
-        messageParse;
+      const {
+        content,
+        sendUserName,
+        sendUserId,
+        sendRoomId,
+        sendRoomName,
+        type,
+        sendTime,
+      } = messageParse;
+      const sendTimeNow = dayjs().valueOf();
       // 如果发过来的是消息，那么直接广播出去即可
       if (type === 'message') {
         // 将发送来的消息存入数据库
         await runSql(
           `insert into ${logTable} 
-            (log_id, log_content, log_time, log_room_id, log_user_id, log_user_name) 
+            (log_id, log_content, log_time, log_room_id, log_room_name, log_user_id, log_user_name) 
             values 
-            ('${sendRoom}_${sendUserId}_${sendTime}', '${content}', '${sendTime}', '${sendRoom}', '${sendUserId}', '${sendUserName}')
+            ('${sendTimeNow}', '${content}', '${sendTime}', '${sendRoomId}', '${sendRoomName}', '${sendUserId}', '${sendUserName}')
           `,
         );
         // 广播消息给同一房间的其他客户端
@@ -165,7 +185,7 @@ function setupWebSocket(server) {
       // 如果是请求最近的200条聊天记录
       if (type === 'query-logs') {
         // 广播消息给指定的这个用户
-        const logs = await getLogsByRoomId(sendRoom);
+        const logs = await getLogsByRoomId(sendRoomId);
         broadcastToRoom(
           getUserClients(sendUserId),
           JSON.stringify([
@@ -181,16 +201,28 @@ function setupWebSocket(server) {
     // 监听客户端断开连接
     ws.on('close', async () => {
       const exitTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
+      const exitTimeNow = dayjs().valueOf();
+
+      // 更新 用户 的活跃房间： 去掉当前房间
+      const queryExitRoomIdsSql = `SELECT user_id, user_name, room_ids FROM ${userTable} where user_id='${nickId}'`;
+      const userInfoExit = (await runSql(queryExitRoomIdsSql))[0];
+      const user_name = userInfoExit?.user_name;
+      const roomIdsExit =
+        userInfoExit?.room_ids?.split(',').filter(Boolean) || [];
+      const newRoomIdsExit = _.filter(roomIdsExit, (item) => item !== roomId);
+      const newRoomIdsExitStr = newRoomIdsExit.join(',');
+      const user_status = newRoomIdsExit.length > 0 ? 'online' : 'offline';
+
       const exitMessage = `${user_name} 离开了房间`;
       await runSql(
-        `update ${userTable} set user_status='offline', room_ids='' where user_id='${nickId}' `,
+        `update ${userTable} set user_status='${user_status}',room_ids='${newRoomIdsExitStr}' where user_id='${nickId}' `,
       );
       // 离开房间的信息也入库吧
       await runSql(
         `insert into ${logTable} 
-        (log_id, log_content, log_time, log_room_id, log_user_id, log_user_name) 
+        (log_id, log_content, log_time, log_room_id, log_room_name, log_user_id, log_user_name) 
         values 
-        ('${roomId}_${nickId}_${exitTime}', '${exitMessage}', '${exitTime}', '${roomId}', '${nickId}', 'system')
+        ('${exitTimeNow}', '${exitMessage}', '${exitTime}', '${roomId}', '${roomName}', '${nickId}', 'system')
       `,
       );
       const onlineMembers = await getOnlineMembersByRoomId(roomId);
@@ -273,11 +305,16 @@ router.post('/createChatroom', async (req, res) => {
       `insert into ${userTable} (user_id, user_name, user_status, create_time, room_ids, head_num) values ('${user_id}', '${nickName}', 'online', '${nowTime}', '${newRoomIds}', '${headNum}')`,
     );
 
+    // room_id
+    const realRoomId = existRoomId || room_id;
+    // real user id
+    const realUserId = userId || user_id;
+
     res.send({
       success: true,
       data: {
-        chatroomId: existRoomId || room_id,
-        nickId: userId || user_id,
+        chatroomId: realRoomId,
+        nickId: realUserId,
       },
     });
   } catch (e) {
@@ -348,6 +385,23 @@ router.post('/getUserInfo', async (req, res) => {
     res.send({
       success: true,
       data: userName,
+    });
+  } catch (e) {
+    res.send({
+      error: '查询报错',
+    });
+  }
+});
+
+// 根据 userId 查询 用户信息
+router.get('/getLoginLog', async (req, res) => {
+  try {
+    const logTable = `${DB_NAME}.chat_room_log_table`;
+    const querySql = `SELECT log_id, log_content, log_time, log_room_name FROM ${logTable} where log_user_name='system' order by log_time desc limit 1000 `;
+    const result = await runSql(querySql);
+    res.send({
+      success: true,
+      data: result,
     });
   } catch (e) {
     res.send({

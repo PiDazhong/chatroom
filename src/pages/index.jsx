@@ -9,7 +9,7 @@ import {
 } from '@ant-design/icons';
 import { fetchRequest } from 'utils';
 import HeadSelect from 'components/HeadSelect';
-import useUrlParams from './useUrlParams';
+import useUrlParams from 'hooks/useUrlParams';
 import './index.scss';
 
 const Home = () => {

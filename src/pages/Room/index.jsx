@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchRequest } from 'utils';
 import Spin from 'components/Spin';
 import Abbr from 'components/Abbr';
-import useUrlParams from '../useUrlParams';
+import useUrlParams from 'hooks/useUrlParams';
 import './Room.scss';
 
 const Room = () => {
@@ -181,7 +181,8 @@ const Room = () => {
         content: inputValue,
         sendUserName: nickName,
         sendUserId: nickId,
-        sendRoom: roomId,
+        sendRoomId: roomId,
+        sendRoomName: roomName,
         sendTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
         type: 'message',
       };
