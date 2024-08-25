@@ -23,78 +23,62 @@ class WebSocketManager {
 
   // 初始化连接
   initWebSocket() {
+    // rug socket 存在 或者 正在连接, 直接返回
     if (
       this.socket &&
       (this.socket.readyState === WebSocket.OPEN ||
         this.socket.readyState === WebSocket.CONNECTING)
     ) {
-      console.log('WebSocket 连接已存在或正在连接中');
       return;
     }
 
-    console.log('初始化 WebSocket 连接...');
     this.socket = new WebSocket(this.url);
 
     this.socket.onopen = () => {
-      console.log('WebSocket 连接成功');
       this.stopReconnect(); // 确保成功连接后停止重连逻辑
       this.options.onOpen();
       this.startHeartBeat();
     };
 
     this.socket.onmessage = (event) => {
-      console.log('收到消息:', event.data);
       this.options.onMessage(event);
     };
 
     this.socket.onerror = (error) => {
-      console.log('WebSocket 连接错误:', error);
       this.options.onError(error);
-      // this.reconnect(); // 发生错误时尝试重连
     };
 
     this.socket.onclose = (event) => {
-      console.log(
-        'WebSocket 连接关闭，代码:',
-        event.code,
-        '原因:',
-        event.reason,
-      );
       this.options.onClose(event);
       if (event.code !== 1000) {
-        // 1000 表示正常关闭
-        this.reconnect(); // 非正常关闭时重连
+        // 1000 表示正常关闭，非正常关闭时重连
+        this.reconnect();
       }
     };
   }
 
   reconnect() {
-    console.log('尝试重连，当前 readyState:', this.socket.readyState);
-
+    // 如果 已经存在socket 或者 正在重连，则直接返回
     if (
       this.reconnectInterval ||
       this.socket?.readyState === WebSocket.OPEN ||
       this.socket?.readyState === WebSocket.CONNECTING
     ) {
-      console.log('正在重连或已连接，跳过重连');
       return;
     }
 
     this.reconnectInterval = setInterval(() => {
-      console.log('重连中，当前 readyState:', this.socket.readyState);
-
+      // 如果 已经连接，关闭重连计时器，然后返回
       if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-        console.log('连接成功，停止重连');
         this.stopReconnect();
         return;
       }
 
+      // 如果 正在连接，直接返回
       if (this.socket && this.socket.readyState === WebSocket.CONNECTING) {
-        console.log('连接正在建立中，等待...');
         return;
       }
 
-      console.log('未连接，重新初始化 WebSocket');
       this.options.onReconnect();
       this.initWebSocket();
     }, this.options.reconnectDelay);
@@ -116,11 +100,11 @@ class WebSocketManager {
     this.heartBeatInterval = null;
   }
 
+  // 停止重连
   stopReconnect() {
     if (this.reconnectInterval) {
       clearInterval(this.reconnectInterval);
       this.reconnectInterval = null;
-      console.log('重连已停止');
     }
   }
 

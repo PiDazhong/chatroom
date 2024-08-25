@@ -134,40 +134,30 @@ const Room = () => {
         return;
       }
 
-      console.log('初始化 WebSocket 连接...');
       ws.current = new WebSocketManager(
         `/ws?roomId=${roomId}&nickId=${nickId}`,
         {
           reconnectDelay: 5000,
           heartBeatDelay: 5000,
           onOpen: () => {
-            console.log('WebSocket 连接成功');
             message.success({
               content: '聊天室连接成功',
               key: 'success-connect',
             });
           },
           onMessage: (event) => {
-            console.log('收到消息:', event.data);
             handleReciveMessage(event.data);
           },
           onError: (error) => {
             console.error('WebSocket 连接错误', error);
           },
-          onClose: (event) => {
-            console.log(
-              'WebSocket 断开连接，代码:',
-              event.code,
-              '原因:',
-              event.reason,
-            );
+          onClose: () => {
             message.success({
               content: '聊天室断开连接',
               key: 'success-close',
             });
           },
           onReconnect: () => {
-            console.log('正在尝试重新连接...');
             message.warning({
               content: '正在尝试重新连接',
               key: 'success-reconnect',
@@ -182,7 +172,6 @@ const Room = () => {
     initialize();
 
     return () => {
-      console.log('组件卸载，关闭 WebSocket 连接...');
       if (ws.current) {
         ws.current.closeWebSocket();
         ws.current = null;
