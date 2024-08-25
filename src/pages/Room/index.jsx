@@ -2,14 +2,15 @@
  * @des 房间
  */
 
-import { useState, useRef, useEffect } from 'react';
-import { Button, Input, message, Tooltip } from 'antd';
+import { useState, useRef, useLayoutEffect, useEffect } from 'react';
+import { Input, message, Tooltip } from 'antd';
 import dayjs from 'dayjs';
 import _ from 'lodash';
 import { useNavigate } from 'react-router-dom';
 import { fetchRequest } from 'utils';
 import Spin from 'components/Spin';
 import Abbr from 'components/Abbr';
+import WebSocketManager from 'components/WebSocketManager';
 import useUrlParams from 'hooks/useUrlParams';
 import './Room.scss';
 
@@ -116,10 +117,78 @@ const Room = () => {
   };
 
   useEffect(() => {
-    validate();
-    getRoomInfo();
-    getUserInfo();
-  }, []);
+    const initialize = async () => {
+      // 先执行验证和数据获取
+      await validate();
+      await getRoomInfo();
+      await getUserInfo();
+
+      // 确保房间 ID 和用户 ID 都存在
+      if (roomId && nickId) {
+        connectWebSocket();
+      }
+    };
+
+    const connectWebSocket = () => {
+      if (ws.current && ws.current.getReadyState() !== WebSocket.CLOSED) {
+        return;
+      }
+
+      console.log('初始化 WebSocket 连接...');
+      ws.current = new WebSocketManager(
+        `/ws?roomId=${roomId}&nickId=${nickId}`,
+        {
+          reconnectDelay: 5000,
+          heartBeatDelay: 5000,
+          onOpen: () => {
+            console.log('WebSocket 连接成功');
+            message.success({
+              content: '聊天室连接成功',
+              key: 'success-connect',
+            });
+          },
+          onMessage: (event) => {
+            console.log('收到消息:', event.data);
+            handleReciveMessage(event.data);
+          },
+          onError: (error) => {
+            console.error('WebSocket 连接错误', error);
+          },
+          onClose: (event) => {
+            console.log(
+              'WebSocket 断开连接，代码:',
+              event.code,
+              '原因:',
+              event.reason,
+            );
+            message.success({
+              content: '聊天室断开连接',
+              key: 'success-close',
+            });
+          },
+          onReconnect: () => {
+            console.log('正在尝试重新连接...');
+            message.warning({
+              content: '正在尝试重新连接',
+              key: 'success-reconnect',
+            });
+          },
+        },
+      );
+
+      ws.current.initWebSocket();
+    };
+
+    initialize();
+
+    return () => {
+      console.log('组件卸载，关闭 WebSocket 连接...');
+      if (ws.current) {
+        ws.current.closeWebSocket();
+        ws.current = null;
+      }
+    };
+  }, [roomId, nickId]);
 
   // 处理 接受到的消息
   const handleReciveMessage = (dataStr) => {
@@ -140,43 +209,12 @@ const Room = () => {
     }
   };
 
-  useEffect(() => {
-    // 创建 websocket 连接
-    ws.current = new WebSocket(`/ws?roomId=${roomId}&nickId=${nickId}`);
-
-    // 连接成功
-    ws.current.onopen = () => {
-      message.success({ content: '聊天室连接成功', key: 'success-connect' });
-    };
-
-    // 接收到消息
-    ws.current.onmessage = (event) => {
-      handleReciveMessage(event.data);
-    };
-
-    // 连接关闭
-    ws.current.onclose = () => {
-      message.success({ content: '聊天室断开连接', key: 'success-close' });
-    };
-
-    // 连接错误
-    ws.current.onerror = (error) => {
-      console.log('WebSocket 连接错误', error);
-      // message.error({ content: '聊天室连接错误', key: 'success-failed' });
-    };
-
-    return () => {
-      ws.current.close();
-      ws.current = null;
-    };
-  }, []);
-
   const sendMessage = () => {
     if (!inputValue) {
       message.warning('空消息');
       return;
     }
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+    if (ws.current && ws.current.getReadyState() === WebSocket.OPEN) {
       const info = {
         content: inputValue,
         sendUserName: nickName,
@@ -186,14 +224,14 @@ const Room = () => {
         sendTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
         type: 'message',
       };
-      ws.current.send(JSON.stringify(info));
+      ws.current.sendMessage(JSON.stringify(info));
       setInputValue(''); // 清空输入框
     }
   };
 
   // 请求最近的聊天记录
   const getLogs = async () => {
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+    if (ws.current && ws.current.getReadyState() === WebSocket.OPEN) {
       const info = {
         content: '',
         sendUserName: nickName,
@@ -203,7 +241,7 @@ const Room = () => {
         sendTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
         type: 'query-logs',
       };
-      ws.current.send(JSON.stringify(info));
+      ws.current.sendMessage(JSON.stringify(info));
     }
   };
 
@@ -286,7 +324,12 @@ const Room = () => {
               </div>
               <div
                 className="room-logs-container-title-exit one-img"
-                onClick={() => navigate('/home')}
+                onClick={() => {
+                  navigate('/home');
+                  if (ws.current) {
+                    ws.current.closeWebSocket();
+                  }
+                }}
               >
                 <img src="/exit.png" />
               </div>

@@ -196,6 +196,10 @@ function setupWebSocket(server) {
           ]),
         );
       }
+
+      if (type === 'ping') {
+        // 说明发来的是心跳包，目前不做处理
+      }
     });
 
     // 监听客户端断开连接
