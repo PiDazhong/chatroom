@@ -3,8 +3,6 @@
  */
 
 import { message } from 'antd';
-import _ from 'lodash';
-import qs from 'query-string';
 import { createBrowserHistory } from 'history';
 import fetchManager from 'components/FetchManager';
 
