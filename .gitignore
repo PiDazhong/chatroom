@@ -13,6 +13,8 @@ dist-ssr
 *.local
 chatroom
 
+chatroom.zip
+
 scripts/mysql.mjs
 scripts/constsES5.mjs
 scripts/constsStatic.mjs
