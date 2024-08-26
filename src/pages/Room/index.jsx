@@ -2,7 +2,7 @@
  * @des 房间
  */
 
-import { useState, useRef, useLayoutEffect, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Input, message, Tooltip } from 'antd';
 import dayjs from 'dayjs';
 import _ from 'lodash';
@@ -62,14 +62,13 @@ const Room = () => {
         navigate('/');
       }
       // 判断 nickId 是否正确进入过 room
-      const { success } = await fetchRequest(
-        '/mysql/validateNickIdByRoomId',
-        'post',
-        {
+      const { success } = await fetchRequest('/mysql/validateNickIdByRoomId', {
+        method: 'post',
+        body: {
           roomId,
           nickId,
         },
-      );
+      });
       if (!success) {
         navigate('/');
       }
@@ -83,13 +82,13 @@ const Room = () => {
   // 查询 roominfo
   const getRoomInfo = async () => {
     try {
-      const { success, data } = await fetchRequest(
-        '/mysql/getRoomInfo',
-        'post',
-        {
+      // 判断 nickId 是否正确进入过 room
+      const { success, data } = await fetchRequest('/mysql/getRoomInfo', {
+        method: 'post',
+        body: {
           roomId,
         },
-      );
+      });
       if (success) {
         setRoomName(data);
       }
@@ -101,13 +100,12 @@ const Room = () => {
   // 查询 userinfo
   const getUserInfo = async () => {
     try {
-      const { success, data } = await fetchRequest(
-        '/mysql/getUserInfo',
-        'post',
-        {
+      const { success, data } = await fetchRequest('/mysql/getUserInfo', {
+        method: 'post',
+        body: {
           userId: nickId,
         },
-      );
+      });
       if (success) {
         setNickName(data);
       }

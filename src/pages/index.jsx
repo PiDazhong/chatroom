@@ -1,12 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
-import { Button, Input, message, Tooltip } from 'antd';
-import _ from 'lodash';
+import { useState, useEffect } from 'react';
+import { Button, Input, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import {
-  InfoCircleOutlined,
-  CloseOutlined,
-  CopyOutlined,
-} from '@ant-design/icons';
 import { fetchRequest } from 'utils';
 import HeadSelect from 'components/HeadSelect';
 import useUrlParams from 'hooks/useUrlParams';
@@ -37,7 +31,9 @@ const Home = () => {
   // 获取 聊天室 的数量
   const querySuccessCount = async () => {
     try {
-      const { success, data } = await fetchRequest('/mysql/getRoomNums', 'get');
+      const { success, data } = await fetchRequest('/mysql/getRoomNums', {
+        method: 'get',
+      });
       if (success) {
         setRoomNum(data);
       } else {
@@ -59,15 +55,14 @@ const Home = () => {
       return;
     }
     try {
-      const { success, data } = await fetchRequest(
-        '/mysql/createChatroom',
-        'post',
-        {
+      const { success, data } = await fetchRequest('/mysql/createChatroom', {
+        method: 'post',
+        body: {
           chatroomName,
           nickName,
           headNum,
         },
-      );
+      });
       if (success) {
         const { chatroomId, nickId } = data;
         // 将 返回回来的 id 存入本地 localstorage

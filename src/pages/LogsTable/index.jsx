@@ -44,12 +44,9 @@ const LogsTable = () => {
   // 获取 板块表内的数据
   const handleGetTableList = async () => {
     setLoading(true);
-    const { data } = await fetchRequest(
-      '/mysql/getLoginLog',
-      'get',
-      {},
-      setLoading,
-    );
+    const { data } = await fetchRequest('/mysql/getLoginLog', {
+      method: 'get',
+    });
     setTableList(data || []);
     setLoading(false);
   };
