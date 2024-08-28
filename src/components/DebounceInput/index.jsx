@@ -1,5 +1,6 @@
 /**
  * @des  防抖输入
+ * @des-url https://www.quantanalysis.cn/icons/components/DebounceInput.png
  */
 import React, { useCallback, useState, useEffect } from 'react';
 import { Input } from 'antd';
@@ -12,6 +13,7 @@ const DebounceInput = ({
   delay = 300,
   disabled,
   className,
+  style = {},
 }) => {
   const [text, setText] = useState(value);
 
@@ -23,7 +25,7 @@ const DebounceInput = ({
     _.debounce((val) => {
       onChange(val);
     }, delay),
-    [delay, onChange]
+    [delay, onChange],
   );
 
   const handleOnChange = (e) => {
@@ -35,6 +37,7 @@ const DebounceInput = ({
   return (
     <Input
       className={className}
+      style={style}
       value={text}
       onChange={handleOnChange}
       placeholder={placeholder}

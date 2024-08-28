@@ -1,0 +1,93 @@
+.quill-text-editor.ql-editor-container {
+  .ql-toolbar {
+    padding: 6px 8px;
+
+    .ql-formats {
+      margin-right: 36px;
+
+      button {
+        .ql-stroke {
+          stroke: var(--black45-opcity1);
+        }
+
+        &:hover {
+          color: var(--brand);
+
+          .ql-stroke {
+            stroke: var(--brand);
+          }
+        }
+
+        &.ql-link::after {
+          border-right: 0;
+          padding-left: 6px;
+          content: '链接';
+        }
+
+        &.ql-clean::after {
+          border-right: 0;
+          padding-left: 6px;
+          content: '清空样式';
+        }
+      }
+    }
+  }
+
+  .ql-container {
+    .ql-editor {
+      font-size: 12px;
+
+      a {
+        color: var(--brand);
+      }
+
+      &::before {
+        font-style: normal;
+        color: var(--black45);
+        font-size: 12px;
+      }
+    }
+
+    .ql-tooltip input[data-link]::placeholder {
+      opacity: 0;
+      font-style: normal;
+    }
+
+    .ql-tooltip[data-mode='link']::before {
+      content: '网址:';
+      color: var(--black45);
+    }
+
+    .ql-preview {
+      color: var(--brand);
+    }
+
+    .ql-tooltip.ql-editing a.ql-action::after {
+      border-right: 0;
+      content: '保存';
+      padding-right: 0;
+      color: var(--brand);
+    }
+
+    .ql-tooltip::before {
+      content: '网址:';
+      line-height: 26px;
+      margin-right: 8px;
+      color: var(--black45);
+    }
+
+    .ql-tooltip a.ql-action::after {
+      border-right: 1px solid var(--grey);
+      content: '编辑';
+      margin-left: 16px;
+      padding-right: 8px;
+      color: var(--brand);
+    }
+
+    .ql-tooltip a.ql-remove::before {
+      content: '移除';
+      margin-left: 8px;
+      color: var(--brand);
+    }
+  }
+}

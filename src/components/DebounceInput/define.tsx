@@ -1,4 +1,4 @@
-interface Person {
+interface Props {
   /** value */
   value: any;
 

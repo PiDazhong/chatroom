@@ -1,5 +1,6 @@
 /**
  * @des 简单的 loading 组件
+ * @des-url https://www.quantanalysis.cn/icons/components/Spin.png
  */
 
 import React from 'react';
@@ -30,7 +31,9 @@ const Spin = ({
                 height: dotSize,
                 marginLeft: -dotSize / 2,
                 marginTop: -dotSize / 2,
-                transform: `rotate(${(i * 360) / dotNum}deg) translateY(${size / 2}px)`,
+                transform: `rotate(${(i * 360) / dotNum}deg) translateY(${
+                  size / 2
+                }px)`,
               }}
             >
               <div

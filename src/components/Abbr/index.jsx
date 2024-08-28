@@ -1,5 +1,6 @@
 /**
  * @des 自动缩略文本组件
+ * @des-url https://www.quantanalysis.cn/icons/components/Abbr.png
  */
 import React, { useRef, useState } from 'react';
 import * as _ from 'lodash';

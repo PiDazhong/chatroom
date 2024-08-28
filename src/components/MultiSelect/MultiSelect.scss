@@ -1,0 +1,64 @@
+.mutli-select-element-dropdown {
+  .dropdown-content {
+    max-height: 370px;
+    overflow: hidden;
+
+    .search-input {
+      height: 30px;
+    }
+
+    .option-container {
+      max-height: 300px;
+      overflow-y: scroll;
+      padding: 4px 0;
+
+      .option-item {
+        padding: 4px 12px;
+
+        &.option-item-active {
+          background-color: var(--selected-background);
+        }
+
+        .ant-checkbox-wrapper {
+          width: 100%;
+
+          > span:nth-child(2) {
+            width: calc(100% - 40px);
+          }
+        }
+      }
+
+      .abbr-option-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+
+        .abbr-option-item-label {
+          color: var(--black65);
+        }
+
+        .abbr-option-item-des {
+          color: var(--black45);
+          font-size: 12px;
+          max-width: 60px;
+        }
+      }
+    }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--black10);
+      padding: 4px 6px 4px 12px;
+    }
+  }
+}
+
+.mutli-select-element.ant-select {
+  .ant-select-selection-item {
+    background-color: var(--brand15);
+    color: var(--brand);
+  }
+}

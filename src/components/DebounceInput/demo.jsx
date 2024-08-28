@@ -9,7 +9,12 @@ const MemoEl = () => {
     <div>
       <div>当前输入内容：{text}</div>
       <br />
-      <DebounceInput value={text} onChange={setText} placeholder={'请输入'} />
+      <DebounceInput
+        style={{ width: 200 }}
+        value={text}
+        onChange={setText}
+        placeholder={'请输入'}
+      />
     </div>
   );
 };
