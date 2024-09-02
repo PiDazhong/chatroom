@@ -23,20 +23,19 @@ class WebSocketManager {
 
   // 初始化连接
   initWebSocket() {
-    // rug socket 存在 或者 正在连接, 直接返回
-    if (
-      this.socket &&
-      (this.socket.readyState === WebSocket.OPEN ||
-        this.socket.readyState === WebSocket.CONNECTING)
-    ) {
+    // 如果 socket 存在 或者 正在连接, 直接返回
+    if (this.isOnline() || this.isOnConnecting()) {
       return;
     }
 
     this.socket = new WebSocket(this.url);
 
     this.socket.onopen = () => {
-      this.stopReconnect(); // 确保成功连接后停止重连逻辑
+      // 确保成功连接后停止重连逻辑
+      this.stopReconnect();
+      // 连接成功回调
       this.options.onOpen();
+      // 开启心跳
       this.startHeartBeat();
     };
 
@@ -59,23 +58,19 @@ class WebSocketManager {
 
   reconnect() {
     // 如果 已经存在socket 或者 正在重连，则直接返回
-    if (
-      this.reconnectInterval ||
-      this.socket?.readyState === WebSocket.OPEN ||
-      this.socket?.readyState === WebSocket.CONNECTING
-    ) {
+    if (this.reconnectInterval || this.isOnline() || this.isOnConnecting()) {
       return;
     }
 
     this.reconnectInterval = setInterval(() => {
       // 如果 已经连接，关闭重连计时器，然后返回
-      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      if (this.isOnline()) {
         this.stopReconnect();
         return;
       }
 
       // 如果 正在连接，直接返回
-      if (this.socket && this.socket.readyState === WebSocket.CONNECTING) {
+      if (this.isOnConnecting()) {
         return;
       }
 
@@ -88,7 +83,7 @@ class WebSocketManager {
   startHeartBeat() {
     this.heartBeatInterval = setInterval(() => {
       // 如果socket存在且连接成功，发送心跳包
-      if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      if (this.isOnline()) {
         this.socket.send(JSON.stringify({ type: 'ping' }));
       }
     }, this.options.heartBeatDelay);
@@ -110,11 +105,7 @@ class WebSocketManager {
 
   // 手动关闭 WebSocket
   closeWebSocket() {
-    if (
-      this.socket &&
-      (this.socket?.readyState === WebSocket.OPEN ||
-        this.socket?.readyState === WebSocket.CONNECTING)
-    ) {
+    if (this.isOnline() || this.isOnConnecting()) {
       this.stopHeartBeat();
       this.stopReconnect();
       this.socket.close(1000, '正常关闭');
@@ -123,7 +114,7 @@ class WebSocketManager {
 
   // 发送消息
   sendMessage(message) {
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+    if (this.isOnline()) {
       this.socket.send(message);
     }
   }
@@ -134,6 +125,22 @@ class WebSocketManager {
       return this.socket.readyState;
     }
     return -1;
+  }
+
+  // 判断 websocket 是否在线
+  isOnline() {
+    if (this.socket) {
+      return this.socket.readyState === WebSocket.OPEN;
+    }
+    return false;
+  }
+
+  // 判断 websocket 是否正在连接
+  isOnConnecting() {
+    if (this.socket) {
+      return this.socket.readyState === WebSocket.CONNECTING;
+    }
+    return false;
   }
 }
 

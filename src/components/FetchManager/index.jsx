@@ -75,7 +75,8 @@ class FetchManager {
       }
 
       const response = await this.fetchWithTimeout();
-      const data = await this.parseResponse(response);
+      const responseStr = await response.text();
+      const data = JSON.parse(responseStr || '{}');
 
       if (data?.error) {
         this.onError(data.error);
@@ -90,27 +91,12 @@ class FetchManager {
       return data;
     } catch (error) {
       this.handleRequestError(error);
+      if (error.message === 'Request timed out') {
+        this.onError('请求超时:', error);
+      } else {
+        this.onError('请求错误:', error);
+      }
       return {};
-    }
-  }
-
-  // 处理请求结果的 parse
-  async parseResponse(response) {
-    try {
-      const dataJson = await response.text();
-      return JSON.parse(dataJson || '{}');
-    } catch (error) {
-      this.onError('JSON parse错误:', error);
-      return {};
-    }
-  }
-
-  // 处理超时或请求错误的情况
-  handleRequestError(error) {
-    if (error.message === 'Request timed out') {
-      this.onError('请求超时:', error);
-    } else {
-      this.onError('请求错误:', error);
     }
   }
 
@@ -127,7 +113,7 @@ class FetchManager {
     try {
       const jwtLong = localStorage.getItem('quantanalysis_jwt_long');
       if (!jwtLong) {
-        throw new Error('长效jwt找不到，无法刷新token');
+        throw new Error('长jwt找不到，无法刷新token');
       }
 
       const response = await fetch('/mysql/refreshToken', {
@@ -138,11 +124,12 @@ class FetchManager {
         },
       });
 
-      if (!response.ok) {
+      const data = await response.json();
+
+      if (!data.ok) {
         throw new Error('刷新 token 失败');
       }
 
-      const data = await response.json();
       if (data?.token) {
         localStorage.setItem('quantanalysis_jwt', data.token);
         this.headers.Authorization = `Bearer ${data.token}`;
