@@ -65,10 +65,12 @@ deploy_prod:
     - cd $CI_COMMIT_REF_NAME
     # 将打包文件名与分支名称关联
     - tar -czf chatroom_$CI_COMMIT_REF_NAME.tar.gz chatroom/
+    # 在远程服务器上创建分支目录
+    - ssh root@47.120.40.71 "mkdir -p /encrypt/$CI_COMMIT_REF_NAME"
     # 发送打包文件到服务器对应分支的目录
     - scp chatroom_$CI_COMMIT_REF_NAME.tar.gz root@47.120.40.71:/encrypt/$CI_COMMIT_REF_NAME/
-    # 在服务器上创建分支目录并解压到对应的分支目录
-    - ssh root@47.120.40.71 "mkdir -p /encrypt/$CI_COMMIT_REF_NAME && tar -xzf /encrypt/$CI_COMMIT_REF_NAME/chatroom_$CI_COMMIT_REF_NAME.tar.gz -C /encrypt/$CI_COMMIT_REF_NAME/"
+    # 在服务器上解压到对应的分支目录
+    - ssh root@47.120.40.71 "tar -xzf /encrypt/$CI_COMMIT_REF_NAME/chatroom_$CI_COMMIT_REF_NAME.tar.gz -C /encrypt/$CI_COMMIT_REF_NAME/"
   only:
     - master
     - /^v\d+\.\d+\.\d+$/
