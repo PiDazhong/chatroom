@@ -9,6 +9,7 @@ lint:
   variables:
     GIT_STRATEGY: none # 禁用默认的代码拉取
   before_script:
+    - echo "https://oauth2:${ACCESS_TOKEN}@gitlab.quantanalysis.cn/chatroom/chatroom.git"
     - git config --global url."https://oauth2:${ACCESS_TOKEN}@gitlab.quantanalysis.cn".insteadOf "https://gitlab.quantanalysis.cn"
     - if [ -d ".git" ]; then git pull; else git clone https://oauth2:${ACCESS_TOKEN}@gitlab.quantanalysis.cn/chatroom/chatroom.git .; fi
     - git remote -v
