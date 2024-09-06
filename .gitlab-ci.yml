@@ -55,12 +55,16 @@ deploy_prod:
     GIT_STRATEGY: none # 禁用默认的代码拉取
   before_script:
     - mkdir -p ~/.ssh
+    # 启动 SSH agent 并添加私钥
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
     # 检查 known_hosts 文件中是否已经包含目标服务器的主机密钥，避免重复添加
     - grep -q "^47.120.40.71" ~/.ssh/known_hosts || ssh-keyscan 47.120.40.71 >> ~/.ssh/known_hosts
   script:
     # 进入对应分支的目录并打包文件
     - cd $CI_COMMIT_REF_NAME
-    - tar -czf chatroom_$CI_COMMIT_REF_NAME.tar.gz chatroom/ # 将打包文件名与分支名称关联
+    # 将打包文件名与分支名称关联
+    - tar -czf chatroom_$CI_COMMIT_REF_NAME.tar.gz chatroom/
     # 发送打包文件到服务器对应分支的目录
     - scp chatroom_$CI_COMMIT_REF_NAME.tar.gz root@47.120.40.71:/encrypt/$CI_COMMIT_REF_NAME/
     # 在服务器上创建分支目录并解压到对应的分支目录
