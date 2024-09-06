@@ -10,7 +10,8 @@ lint:
     GIT_STRATEGY: none # 禁用默认的代码拉取
   before_script:
     - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null # 添加私钥
+    # 添加私钥
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
     # 检查是否已经有主机密钥，如果没有则添加
     - grep -q "^gitlab.quantanalysis.cn" ~/.ssh/known_hosts || ssh-keyscan -p 2222 gitlab.quantanalysis.cn >> ~/.ssh/known_hosts
