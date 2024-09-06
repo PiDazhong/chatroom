@@ -43,6 +43,9 @@ build_podman_image:
   services:
     - docker:20.10.16-dind # GitLab CI/CD 可能仍需要 Docker 容器作为服务
   script:
+    - pwd # 输出当前工作目录
+    - ls -la # 列出当前目录中的所有文件
+
     # 登录 GitLab 容器注册表
     - echo "$CI_REGISTRY_PASSWORD" | podman login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
