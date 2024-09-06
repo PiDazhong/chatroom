@@ -12,7 +12,8 @@ lint:
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null # 添加私钥
     - mkdir -p ~/.ssh
-    - ssh-keyscan -p 2222 gitlab.quantanalysis.cn >> ~/.ssh/known_hosts # 指定端口 2222
+    # 检查是否已经有主机密钥，如果没有则添加
+    - grep -q "^gitlab.quantanalysis.cn" ~/.ssh/known_hosts || ssh-keyscan -p 2222 gitlab.quantanalysis.cn >> ~/.ssh/known_hosts
     # 创建一个基于分支名的文件夹，并进入该文件夹
     - mkdir -p $CI_COMMIT_REF_NAME
     - cd $CI_COMMIT_REF_NAME
@@ -23,8 +24,8 @@ lint:
       else git clone --branch $CI_COMMIT_REF_NAME ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git .;
       fi
   script:
-    - npm install
-    - npm run lint # 假设你使用的是 JavaScript 相关项目
+    - yarn install
+    - yarn lint # 假设你使用的是 JavaScript 相关项目
   except:
     - tags # 排除在 tags 上运行
 
@@ -34,8 +35,8 @@ build_frontend:
   before_script:
     - cd $CI_COMMIT_REF_NAME # 进入对应的分支目录
   script:
-    - npm install
-    - npm run build # 打包项目，生成静态文件
+    - yarn install
+    - yarn just-build # 打包项目，生成静态文件
   artifacts:
     paths:
       - $CI_COMMIT_REF_NAME/chatroom/
