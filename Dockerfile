@@ -1,4 +1,4 @@
-FROM centos:latest
+FROM centos:7
 
 # 替换为阿里云源
 RUN sed -i 's|mirrorlist=http://mirrorlist.centos.org|#mirrorlist=http://mirrorlist.centos.org|g' /etc/yum.repos.d/CentOS-Base.repo && \
