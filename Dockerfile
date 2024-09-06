@@ -2,6 +2,10 @@ FROM centos:stream9
 
 WORKDIR /app
 
+# 安装必要的工具，包括 tar 和 xz
+RUN yum install -y tar xz \
+    && yum clean all
+
 # 将本地的 node-v20.5.0-linux-x64.tar.xz 复制到容器中
 COPY node-v20.5.0-linux-x64.tar.xz /tmp/node-v20.5.0-linux-x64.tar.xz
 
