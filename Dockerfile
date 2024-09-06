@@ -7,20 +7,21 @@ RUN if ! command -v tar &> /dev/null || ! command -v xz &> /dev/null; then \
         yum install -y tar xz && yum clean all; \
     fi
 
-# 将本地的 node-v20.5.0-linux-x64.tar.xz 复制到容器中
-COPY node-v20.5.0-linux-x64.tar.xz /tmp/node-v20.5.0-linux-x64.tar.xz
+# 将本地的 node-v21.1.0-linux-x64.tar.xz 复制到容器中
+COPY node-v21.1.0-linux-x64.tar.xz /tmp/node-v21.1.0-linux-x64.tar.xz
 
 # 解压 Node.js 到 /usr/local 目录
-RUN tar -xJf /tmp/node-v20.5.0-linux-x64.tar.xz -C /usr/local --strip-components=1 \
-    && rm /tmp/node-v20.5.0-linux-x64.tar.xz
+RUN tar -xJf /tmp/node-v21.1.0-linux-x64.tar.xz -C /usr/local --strip-components=1 \
+    && rm /tmp/node-v21.1.0-linux-x64.tar.xz
 
+# 安装 Yarn 并将 npm 源设置为淘宝源
 RUN npm install -g yarn 
-
-# 将 npm 源设置为淘宝源，提升依赖安装速度
 RUN npm config set registry https://registry.npmmirror.com
 
+# 复制 package.json 和 yarn.lock 以利用缓存加速依赖安装
 COPY package.json yarn.lock ./
 
+# 如果 package.json 或 yarn.lock 没有变动，则依赖安装步骤将被缓存
 RUN yarn install
 
 COPY . .

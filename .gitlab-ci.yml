@@ -41,25 +41,27 @@ build_podman_image:
     IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   image: registry.gitlab.com/podman/stable:latest # 使用 Podman 官方镜像
   services:
-    - docker:20.5.0-dind # GitLab CI/CD 可能仍需要 Docker 容器作为服务
+    - docker:21.1.0-dind # GitLab CI/CD 可能仍需要 Docker 容器作为服务
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/ # 缓存依赖，加速 yarn install
   script:
     # 进入对应分支的目录并打包文件
     - cd $CI_COMMIT_REF_NAME
 
-    # 将 node-v20.5.0-linux-x64.tar.xz 文件复制到工作目录
-    - cp /tmp/node-v20.5.0-linux-x64.tar.xz ./
+    # 将 node-v21.1.0-linux-x64.tar.xz 文件复制到工作目录
+    - cp /tmp/node-v21.1.0-linux-x64.tar.xz ./
 
     # 登录 GitLab 容器注册表
     - echo "$CI_REGISTRY_PASSWORD" | podman login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
-    # 检查镜像是否存在，如果不存在则构建镜像
-    - if podman pull $IMAGE_TAG; then
-      echo "镜像已存在，跳过构建。";
-      else
-      echo "镜像不存在，开始构建。";
-      podman build -t $IMAGE_TAG -f ./Dockerfile .;
-      podman push $IMAGE_TAG;
-      fi
+    # 每次都构建镜像，但利用缓存加速构建过程
+    podman build -t $IMAGE_TAG -f ./Dockerfile .;
+
+    # 推送新的镜像到注册表
+    podman push $IMAGE_TAG;
+
   artifacts:
     paths:
       - $IMAGE_TAG
