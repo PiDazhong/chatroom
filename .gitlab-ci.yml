@@ -7,7 +7,6 @@ stages:
 lint:
   stage: test
   before_script:
-    - echo "Using Access Token: ${ACCESS_TOKEN}"
     - git config --global url."https://oauth2:${ACCESS_TOKEN}@gitlab.quantanalysis.cn".insteadOf "https://gitlab.quantanalysis.cn"
     - git clone https://oauth2:${ACCESS_TOKEN}@gitlab.quantanalysis.cn/chatroom/chatroom.git .
     - git remote -v
