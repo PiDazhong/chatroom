@@ -53,6 +53,10 @@ deploy_prod:
   stage: deploy
   variables:
     GIT_STRATEGY: none # 禁用默认的代码拉取
+  before_script:
+    - mkdir -p ~/.ssh
+    # 检查 known_hosts 文件中是否已经包含目标服务器的主机密钥，避免重复添加
+    - grep -q "^47.120.40.71" ~/.ssh/known_hosts || ssh-keyscan 47.120.40.71 >> ~/.ssh/known_hosts
   script:
     # 进入对应分支的目录并打包文件
     - cd $CI_COMMIT_REF_NAME
