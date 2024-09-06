@@ -6,6 +6,8 @@ stages:
 # 代码检查阶段
 lint:
   stage: test
+  variables:
+    GIT_STRATEGY: none # 禁用默认的代码拉取
   before_script:
     - git config --global url."https://oauth2:${ACCESS_TOKEN}@gitlab.quantanalysis.cn".insteadOf "https://gitlab.quantanalysis.cn"
     - git clone https://oauth2:${ACCESS_TOKEN}@gitlab.quantanalysis.cn/chatroom/chatroom.git .
