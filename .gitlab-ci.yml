@@ -41,13 +41,13 @@ build_podman_image:
     IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   image: registry.gitlab.com/podman/stable:latest # 使用 Podman 官方镜像
   services:
-    - docker:20.10.16-dind # GitLab CI/CD 可能仍需要 Docker 容器作为服务
+    - docker:20.5.0-dind # GitLab CI/CD 可能仍需要 Docker 容器作为服务
   script:
     # 进入对应分支的目录并打包文件
     - cd $CI_COMMIT_REF_NAME
 
-    - pwd # 输出当前工作目录
-    - ls -la # 列出当前目录中的所有文件
+    # 将 node-v20.5.0-linux-x64.tar.xz 文件复制到工作目录
+    - cp /tmp/node-v20.5.0-linux-x64.tar.xz ./
 
     # 登录 GitLab 容器注册表
     - echo "$CI_REGISTRY_PASSWORD" | podman login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
