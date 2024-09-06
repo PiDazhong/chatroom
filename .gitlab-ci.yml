@@ -56,11 +56,11 @@ build_podman_image:
     # 登录 GitLab 容器注册表
     - echo "$CI_REGISTRY_PASSWORD" | podman login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
-    # 每次都构建镜像，但利用缓存加速构建过程
-    podman build -t $IMAGE_TAG -f ./Dockerfile .;
+    # 构建镜像，使用调试模式
+    - podman build --log-level debug -t $IMAGE_TAG -f ./Dockerfile .
 
-    # 推送新的镜像到注册表
-    podman push $IMAGE_TAG;
+    # 推送镜像到注册表
+    - podman push $IMAGE_TAG
 
   artifacts:
     paths:
