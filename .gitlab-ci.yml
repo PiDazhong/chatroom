@@ -13,8 +13,8 @@ lint:
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null # 添加私钥
     - mkdir -p ~/.ssh
     - ssh-keyscan -p 2222 gitlab.quantanalysis.cn >> ~/.ssh/known_hosts # 指定端口 2222
-    # 判断是否存在 .git 文件夹，如果存在则执行 git pull，否则执行 git clone
-    - if [ -d ".git" ]; then git pull origin master; else git clone ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git .; fi
+    # 将远程仓库 URL 强制修改为 SSH
+    - if [ -d ".git" ]; then git remote set-url origin ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git && git pull origin master; else git clone ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git .; fi
   script:
     - npm install
     - npm run lint # 假设你使用的是 JavaScript 相关项目
