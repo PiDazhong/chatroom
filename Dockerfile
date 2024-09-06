@@ -2,9 +2,10 @@ FROM centos:stream9
 
 WORKDIR /app
 
-# 安装必要的工具，包括 tar 和 xz
-RUN yum install -y tar xz \
-    && yum clean all
+# 检查是否安装了 tar 和 xz，如果没有则安装
+RUN if ! command -v tar &> /dev/null || ! command -v xz &> /dev/null; then \
+        yum install -y tar xz && yum clean all; \
+    fi
 
 # 将本地的 node-v20.5.0-linux-x64.tar.xz 复制到容器中
 COPY node-v20.5.0-linux-x64.tar.xz /tmp/node-v20.5.0-linux-x64.tar.xz
@@ -12,6 +13,8 @@ COPY node-v20.5.0-linux-x64.tar.xz /tmp/node-v20.5.0-linux-x64.tar.xz
 # 解压 Node.js 到 /usr/local 目录
 RUN tar -xJf /tmp/node-v20.5.0-linux-x64.tar.xz -C /usr/local --strip-components=1 \
     && rm /tmp/node-v20.5.0-linux-x64.tar.xz
+
+RUN npm install -g yarn 
 
 # 将 npm 源设置为淘宝源，提升依赖安装速度
 RUN npm config set registry https://registry.npmmirror.com
