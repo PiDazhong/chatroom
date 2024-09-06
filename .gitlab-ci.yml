@@ -43,22 +43,22 @@ build_podman_image:
   services:
     - docker:20.10.16-dind # GitLab CI/CD 可能仍需要 Docker 容器作为服务
   script:
+    # 进入对应分支的目录并打包文件
+    - cd $CI_COMMIT_REF_NAME
+
     - pwd # 输出当前工作目录
     - ls -la # 列出当前目录中的所有文件
 
     # 登录 GitLab 容器注册表
     - echo "$CI_REGISTRY_PASSWORD" | podman login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
-    # 检查镜像是否存在于容器注册表
-    - |
-      if podman pull $IMAGE_TAG; then
-        echo "镜像已存在，跳过构建。"
+    # 检查镜像是否存在，如果不存在则构建镜像
+    - if podman pull $IMAGE_TAG; then
+      echo "镜像已存在，跳过构建。";
       else
-        echo "镜像不存在，开始构建。"
-        # 构建 Podman 镜像
-        podman build -t $IMAGE_TAG .
-        # 推送 Podman 镜像到 GitLab 容器注册表
-        podman push $IMAGE_TAG
+      echo "镜像不存在，开始构建。";
+      podman build -t $IMAGE_TAG -f ./Dockerfile .;
+      podman push $IMAGE_TAG;
       fi
   artifacts:
     paths:
