@@ -32,6 +32,8 @@ lint:
 # 构建前端项目（只有 lint 通过且是 master 或 v 开头的分支时触发）
 build_frontend:
   stage: build
+  variables:
+    GIT_STRATEGY: none # 禁用默认的代码拉取
   before_script:
     - cd $CI_COMMIT_REF_NAME # 进入对应的分支目录
   script:
@@ -49,6 +51,8 @@ build_frontend:
 # 部署到服务器或静态托管服务
 deploy_prod:
   stage: deploy
+  variables:
+    GIT_STRATEGY: none # 禁用默认的代码拉取
   script:
     # 进入对应分支的目录并打包文件
     - cd $CI_COMMIT_REF_NAME
