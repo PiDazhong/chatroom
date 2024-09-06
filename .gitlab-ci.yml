@@ -6,6 +6,8 @@ stages:
 # 代码检查阶段
 lint:
   stage: test
+  before_script:
+    - git config --global url."https://oauth2:${ACCESS_TOKEN}@gitlab.quantanalysis.cn".insteadOf "https://gitlab.quantanalysis.cn"
   script:
     - npm install
     - npm run lint # 假设你使用的是 JavaScript 相关项目
@@ -15,6 +17,8 @@ lint:
 # 构建前端项目（只有 lint 通过且是 master 或 v 开头的分支时触发）
 build_frontend:
   stage: build
+  before_script:
+    - git config --global url."https://oauth2:${ACCESS_TOKEN}@gitlab.quantanalysis.cn".insteadOf "https://gitlab.quantanalysis.cn"
   script:
     - npm install
     - npm run build # 打包项目，生成静态文件
