@@ -9,11 +9,13 @@ lint:
   variables:
     GIT_STRATEGY: none # 禁用默认的代码拉取
   before_script:
-    - echo "https://access_token:${ACCESS_TOKEN}@gitlab.quantanalysis.cn/chatroom/chatroom.git"
-    - git config --global url."https://access_token:${ACCESS_TOKEN}@gitlab.quantanalysis.cn".insteadOf "https://gitlab.quantanalysis.cn"
-    - if [ -d ".git" ]; then git pull; else git clone https://access_token:${ACCESS_TOKEN}@gitlab.quantanalysis.cn/chatroom/chatroom.git .; fi
-    - git remote -v
-  script:
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null # 添加私钥
+    - mkdir -p ~/.ssh
+    - ssh-keyscan -p 2222 gitlab.quantanalysis.cn >> ~/.ssh/known_hosts # 指定端口 2222
+    # 判断是否存在 .git 文件夹，如果存在则执行 git pull，否则执行 git clone
+    - if [ -d ".git" ]; then git pull origin master; else git clone ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git .; fi
+script:
     - npm install
     - npm run lint # 假设你使用的是 JavaScript 相关项目
   except:
