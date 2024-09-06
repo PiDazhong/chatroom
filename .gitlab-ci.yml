@@ -36,6 +36,8 @@ lint:
 build_podman_image:
   stage: build
   variables:
+    # 禁用默认的代码拉取
+    GIT_STRATEGY: none
     IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   image: registry.gitlab.com/podman/stable:latest # 使用 Podman 官方镜像
   services:
