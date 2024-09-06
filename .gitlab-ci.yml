@@ -13,8 +13,15 @@ lint:
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null # 添加私钥
     - mkdir -p ~/.ssh
     - ssh-keyscan -p 2222 gitlab.quantanalysis.cn >> ~/.ssh/known_hosts # 指定端口 2222
-    # 将远程仓库 URL 强制修改为 SSH
-    - if [ -d ".git" ]; then git remote set-url origin ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git && git pull origin master; else git clone ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git .; fi
+    # 创建一个基于分支名的文件夹，并进入该文件夹
+    - mkdir -p $CI_COMMIT_REF_NAME
+    - cd $CI_COMMIT_REF_NAME
+    # 如果文件夹中没有代码，克隆，否则拉取更新
+    - if [ -d ".git" ];
+      then git remote set-url origin ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git &&
+      git pull origin $CI_COMMIT_REF_NAME;
+      else git clone --branch $CI_COMMIT_REF_NAME ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git .;
+      fi
   script:
     - npm install
     - npm run lint # 假设你使用的是 JavaScript 相关项目
@@ -25,13 +32,13 @@ lint:
 build_frontend:
   stage: build
   before_script:
-    - git config --global url."https://access_token:${ACCESS_TOKEN}@gitlab.quantanalysis.cn".insteadOf "https://gitlab.quantanalysis.cn"
+    - cd $CI_COMMIT_REF_NAME # 进入对应的分支目录
   script:
     - npm install
     - npm run build # 打包项目，生成静态文件
   artifacts:
     paths:
-      - chatroom/ # 假设打包后的文件存放在 chatroom 目录
+      - $CI_COMMIT_REF_NAME/chatroom/
   only:
     - master
     - /^v\d+\.\d+\.\d+$/
@@ -42,8 +49,13 @@ build_frontend:
 deploy_prod:
   stage: deploy
   script:
-    - scp chatroom.tar.gz root@47.120.40.71:/encrypt/$CI_COMMIT_REF_NAME/ # 发送打包文件到对应分支的目录
-    - ssh root@47.120.40.71 "mkdir -p /encrypt/$CI_COMMIT_REF_NAME && tar -xzf /encrypt/$CI_COMMIT_REF_NAME/chatroom.tar.gz -C /encrypt/$CI_COMMIT_REF_NAME/" # 在服务器上解压文件到对应分支的目录
+    # 进入对应分支的目录并打包文件
+    - cd $CI_COMMIT_REF_NAME
+    - tar -czf chatroom_$CI_COMMIT_REF_NAME.tar.gz chatroom/ # 将打包文件名与分支名称关联
+    # 发送打包文件到服务器对应分支的目录
+    - scp chatroom_$CI_COMMIT_REF_NAME.tar.gz root@47.120.40.71:/encrypt/$CI_COMMIT_REF_NAME/
+    # 在服务器上创建分支目录并解压到对应的分支目录
+    - ssh root@47.120.40.71 "mkdir -p /encrypt/$CI_COMMIT_REF_NAME && tar -xzf /encrypt/$CI_COMMIT_REF_NAME/chatroom_$CI_COMMIT_REF_NAME.tar.gz -C /encrypt/$CI_COMMIT_REF_NAME/"
   only:
     - master
     - /^v\d+\.\d+\.\d+$/
