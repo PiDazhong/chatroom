@@ -24,8 +24,6 @@ deploy_prod:
   only:
     - master
     - /^v\d+\.\d+\.\d+$/
-  dependencies:
-    - build_podman_image
 # # 构建前端项目（只有 lint 通过且是 master 或 v 开头的分支时触发）
 # build_frontend:
 #   stage: build
