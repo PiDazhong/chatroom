@@ -84,8 +84,13 @@ deploy_prod:
     # 检查 known_hosts 文件中是否已经包含目标服务器的主机密钥，避免重复添加
     - grep -q "^47.120.40.71" ~/.ssh/known_hosts || ssh-keyscan 47.120.40.71 >> ~/.ssh/known_hosts
   script:
-    # 在远程服务器上拉取 Podman 镜像并运行
-    - ssh root@47.120.40.71 "podman pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG && podman run -d --name my-app -p 80:3000 $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
+    # 在远程服务器上登录到 GitLab 容器注册表
+    - ssh root@47.120.40.71 "echo '$CI_REGISTRY_PASSWORD' | podman login -u '$CI_REGISTRY_USER' --password-stdin $CI_REGISTRY"
+    # 拉取镜像并显示镜像列表验证拉取是否成功
+    - ssh root@47.120.40.71 "
+      podman pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG && \
+      echo '镜像拉取成功' && \
+      podman images | grep '$CI_REGISTRY_IMAGE' "
   only:
     - master
     - /^v\d+\.\d+\.\d+$/
