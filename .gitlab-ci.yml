@@ -90,7 +90,7 @@ deploy_prod:
     - ssh root@47.120.40.71 "
       podman pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG && \
       echo '镜像拉取成功' && \
-      podman images | grep '$CI_REGISTRY_IMAGE' "
+      podman images | grep '$CI_REGISTRY_IMAGE'"
   only:
     - master
     - /^v\d+\.\d+\.\d+$/
