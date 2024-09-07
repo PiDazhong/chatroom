@@ -30,7 +30,6 @@ lint:
       git pull origin $CI_COMMIT_REF_NAME;
       else git clone --branch $CI_COMMIT_REF_NAME ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git .;
       fi
-
   script:
     - yarn install
     - yarn lint
@@ -49,10 +48,9 @@ build_podman_image:
   services:
     - docker:21.1.0-dind # GitLab CI/CD 可能仍需要 Docker 容器作为服务
   cache:
-    # key: ${CI_COMMIT_REF_SLUG}
-    # paths:
-    #  - node_modules/ # 缓存依赖，加速 yarn install
-
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/ # 缓存依赖，加速 yarn install
   script:
     # 确保目录存在
     - mkdir -p $CI_COMMIT_REF_NAME
@@ -71,6 +69,9 @@ build_podman_image:
 
     # 推送镜像到 GitLab 容器注册表
     - podman push $IMAGE_TAG
+  rules:
+    # 跳过包含 [skip ci] 的 commit message
+    - if: '$CI_COMMIT_MESSAGE !~ /(\[skip ci\]|[skip-ci]|[ci ckip]|[[ci-skip]])/i'
   only:
     - master
     - /^v\d+\.\d+\.\d+$/

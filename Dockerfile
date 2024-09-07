@@ -31,8 +31,8 @@ COPY package.json yarn.lock ./
 COPY . .
 
 # 如果 package.json 或 yarn.lock 没有变动，则依赖安装步骤将被缓存，暂时注释掉
-# RUN yarn install
+RUN yarn install
 
-# RUN yarn just-build
+RUN yarn just-build
 
 CMD ["yarn", "start"]
