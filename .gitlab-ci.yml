@@ -50,6 +50,7 @@ build_podman_image:
     key: ${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules/ # 缓存依赖，加速 yarn install
+
   script:
     # 确保目录存在
     - mkdir -p $CI_COMMIT_REF_NAME
