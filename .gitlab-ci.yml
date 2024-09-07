@@ -46,6 +46,10 @@ build_podman_image:
   image: registry.gitlab.com/podman/stable:latest # 使用 Podman 官方镜像
   services:
     - docker:21.1.0-dind # GitLab CI/CD 可能仍需要 Docker 容器作为服务
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/ # 缓存依赖，加速 yarn install
   script:
     # 确保目录存在
     - mkdir -p $CI_COMMIT_REF_NAME
