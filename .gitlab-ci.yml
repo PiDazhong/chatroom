@@ -95,12 +95,19 @@ deploy_prod:
     - grep -q "^47.120.40.71" ~/.ssh/known_hosts || ssh-keyscan 47.120.40.71 >> ~/.ssh/known_hosts
   script:
     # 在远程服务器上登录到 GitLab 容器注册表
-    - ssh root@47.120.40.71 "echo '$CI_REGISTRY_PASSWORD' | podman login -u '$CI_REGISTRY_USER' --password-stdin $CI_REGISTRY"
+    - ssh root@47.120.40.71 "
+      source ~/.bashrc;
+      echo '$CI_REGISTRY_PASSWORD' | podman login -u '$CI_REGISTRY_USER' --password-stdin $CI_REGISTRY"
 
     # 检查镜像是否存在并显示镜像描述信息
-    - ssh root@47.120.40.71 "podman inspect $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG && \
-      echo '镜像存在，显示其详情：'; \
-      podman inspect $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG | jq -c '.[0].Config.Labels'"
+    - ssh root@47.120.40.71 "
+      source ~/.bashrc;
+      if podman inspect $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG > /dev/null 2>&1; then
+      echo '镜像存在，显示其详情：';
+      podman inspect $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG | jq -c '.[0].Config.Labels';
+      else
+      echo '镜像不存在';
+      fi"
   only:
     - master
     - /^v\d+\.\d+\.\d+$/
