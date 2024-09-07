@@ -59,8 +59,8 @@ build_podman_image:
     # 登录 GitLab 容器注册表
     - echo "$CI_REGISTRY_PASSWORD" | podman login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
-    # 使用缓存加速构建镜像
-    - podman build -t $IMAGE_TAG -f ./Dockerfile .
+    # 构建镜像，添加元数据信息
+    - podman build -t $IMAGE_TAG --label "commit_author=$CI_COMMIT_AUTHOR" --label "commit_ref_name=$CI_COMMIT_REF_NAME" --label "build_time=$(date)" -f ./Dockerfile .
 
     # 推送镜像到 GitLab 容器注册表
     - podman push $IMAGE_TAG
@@ -86,11 +86,11 @@ deploy_prod:
   script:
     # 在远程服务器上登录到 GitLab 容器注册表
     - ssh root@47.120.40.71 "echo '$CI_REGISTRY_PASSWORD' | podman login -u '$CI_REGISTRY_USER' --password-stdin $CI_REGISTRY"
-    # 拉取镜像并显示镜像列表验证拉取是否成功
+    # 远程查询镜像详情并验证镜像是否存在
     - ssh root@47.120.40.71 "
-      podman pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG && \
-      echo '镜像拉取成功' && \
-      podman images | grep '$CI_REGISTRY_IMAGE'"
+      podman manifest inspect $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG && \
+      echo '镜像存在，显示其详情：' && \
+      podman inspect $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG | jq '.[0].Config.Labels'"
   only:
     - master
     - /^v\d+\.\d+\.\d+$/
