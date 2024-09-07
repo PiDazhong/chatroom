@@ -1,5 +1,74 @@
 stages:
+  - test
+  - build
   - deploy
+
+# 代码检查阶段
+lint:
+  stage: test
+  variables:
+    # 禁用默认的代码拉取
+    GIT_STRATEGY: none
+  before_script:
+    - eval $(ssh-agent -s)
+    # 添加私钥
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    # 检查是否已经有主机密钥，如果没有则添加
+    - grep -q "^gitlab.quantanalysis.cn" ~/.ssh/known_hosts || ssh-keyscan -p 2222 gitlab.quantanalysis.cn >> ~/.ssh/known_hosts
+    # 创建一个基于分支名的文件夹，并进入该文件夹
+    - mkdir -p $CI_COMMIT_REF_NAME
+    - cd $CI_COMMIT_REF_NAME
+    # 如果文件夹中没有代码，克隆，否则拉取更新
+    - if [ -d ".git" ];
+      then git remote set-url origin ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git &&
+      git pull origin $CI_COMMIT_REF_NAME;
+      else git clone --branch $CI_COMMIT_REF_NAME ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git .;
+      fi
+  script:
+    - yarn install
+    - yarn lint
+  except:
+    # 排除在 tags 上运行
+    - tags
+
+# 构建 Podman 镜像并推送到容器注册表
+build_podman_image:
+  stage: build
+  variables:
+    # 禁用默认的代码拉取
+    GIT_STRATEGY: none
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  image: registry.gitlab.com/podman/stable:latest # 使用 Podman 官方镜像
+  services:
+    - docker:21.1.0-dind # GitLab CI/CD 可能仍需要 Docker 容器作为服务
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/ # 缓存依赖，加速 yarn install
+  script:
+    # 确保目录存在
+    - mkdir -p $CI_COMMIT_REF_NAME
+
+    # 进入对应分支的目录
+    - cd $CI_COMMIT_REF_NAME
+
+    # 将 node-v21.1.0-linux-x64.tar.xz 文件复制到工作目录
+    - cp /tmp/node-v21.1.0-linux-x64.tar.xz ./
+
+    # 登录 GitLab 容器注册表
+    - echo "$CI_REGISTRY_PASSWORD" | podman login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+
+    # 构建镜像，添加元数据信息
+    - podman build -t $IMAGE_TAG --label "commit_author=$CI_COMMIT_AUTHOR" --label "commit_ref_name=$CI_COMMIT_REF_NAME" --label "build_time=$(date)" -f ./Dockerfile .
+
+    # 推送镜像到 GitLab 容器注册表
+    - podman push $IMAGE_TAG
+  only:
+    - master
+    - /^v\d+\.\d+\.\d+$/
+  dependencies:
+    - lint
 
 # 部署到服务器
 deploy_prod:
@@ -24,6 +93,8 @@ deploy_prod:
   only:
     - master
     - /^v\d+\.\d+\.\d+$/
+  dependencies:
+    - build_podman_image
 # # 构建前端项目（只有 lint 通过且是 master 或 v 开头的分支时触发）
 # build_frontend:
 #   stage: build
