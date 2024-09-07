@@ -70,11 +70,12 @@ build_podman_image:
     # 推送镜像到 GitLab 容器注册表
     - podman push $IMAGE_TAG
   rules:
-    # 跳过包含 [skip ci] 的 commit message
-    - if: '$CI_COMMIT_MESSAGE !~ /(\[skip ci\]|[skip-ci]|[ci ckip]|[[ci-skip]])/i'
-  only:
-    - master
-    - /^v\d+\.\d+\.\d+$/
+    # 跳过包含多种形式的 "skip ci" 标记的 commit message
+    - if: '$CI_COMMIT_MESSAGE !~ /(\[skip ci\]|\[skip-ci\]|\[ci skip\]|\[ci-skip\])/i'
+      when: always
+    # 只在 master 分支或符合版本号格式的分支上运行
+    - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_REF_NAME =~ /^v\d+\.\d+\.\d+$/'
+      when: always
   dependencies:
     - lint
 
@@ -109,9 +110,13 @@ deploy_prod:
       else
       echo '镜像不存在';
       fi"
-  only:
-    - master
-    - /^v\d+\.\d+\.\d+$/
+  rules:
+    # 跳过包含多种形式的 "skip ci" 标记的 commit message
+    - if: '$CI_COMMIT_MESSAGE !~ /(\[skip ci\]|\[skip-ci\]|\[ci skip\]|\[ci-skip\])/i'
+      when: always
+    # 只在 master 分支或符合版本号格式的分支上运行
+    - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_REF_NAME =~ /^v\d+\.\d+\.\d+$/'
+      when: always
   dependencies:
     - build_podman_image
 # # 构建前端项目（只有 lint 通过且是 master 或 v 开头的分支时触发）
