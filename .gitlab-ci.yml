@@ -11,14 +11,18 @@ lint:
     GIT_STRATEGY: none
   before_script:
     - eval $(ssh-agent -s)
+
     # 添加私钥
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
+
     # 检查是否已经有主机密钥，如果没有则添加
     - grep -q "^gitlab.quantanalysis.cn" ~/.ssh/known_hosts || ssh-keyscan -p 2222 gitlab.quantanalysis.cn >> ~/.ssh/known_hosts
+
     # 创建一个基于分支名的文件夹，并进入该文件夹
     - mkdir -p $CI_COMMIT_REF_NAME
     - cd $CI_COMMIT_REF_NAME
+
     # 如果文件夹中没有代码，克隆，否则拉取更新
     - if [ -d ".git" ];
       then git remote set-url origin ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git &&
@@ -78,15 +82,18 @@ deploy_prod:
     GIT_STRATEGY: none
   before_script:
     - mkdir -p ~/.ssh
+
     # 启动 SSH agent 并添加私钥
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+
     # 检查 known_hosts 文件中是否已经包含目标服务器的主机密钥，避免重复添加
     - grep -q "^47.120.40.71" ~/.ssh/known_hosts || ssh-keyscan 47.120.40.71 >> ~/.ssh/known_hosts
   script:
     # 在远程服务器上登录到 GitLab 容器注册表
     - ssh root@47.120.40.71 "echo '$CI_REGISTRY_PASSWORD' | podman login -u '$CI_REGISTRY_USER' --password-stdin $CI_REGISTRY"
-      # 检查镜像是否存在并显示镜像描述信息
+
+    # 检查镜像是否存在并显示镜像描述信息
     - ssh root@47.120.40.71 "podman inspect $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG && \
       echo '镜像存在，显示其详情：'; \
       podman inspect $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG | jq -c '.[0].Config.Labels'"
