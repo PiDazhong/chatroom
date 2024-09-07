@@ -43,11 +43,7 @@ pipeline_job:
 
     # 构建镜像
     - cp /tmp/node-v21.1.0-linux-x64.tar.xz ./
-    - podman build -t $IMAGE_TAG \
-      --label "commit_author=$CI_COMMIT_AUTHOR" \
-      --label "commit_ref_name=$CI_COMMIT_REF_NAME" \
-      --label "build_time=$(date)" \
-      -f ./Dockerfile .
+    - podman build -t $IMAGE_TAG --label "commit_author=$CI_COMMIT_AUTHOR" --label "commit_ref_name=$CI_COMMIT_REF_NAME" --label "build_time=$(date)" -f ./Dockerfile .
 
     # 推送镜像到 GitLab 容器注册表
     - podman push $IMAGE_TAG
