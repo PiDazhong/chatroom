@@ -21,10 +21,11 @@ RUN npm config set registry https://registry.npmmirror.com
 # 复制 package.json 和 yarn.lock 以利用缓存加速依赖安装
 COPY package.json yarn.lock ./
 
+# 复制项目的其他文件，排除了 node_modules
+COPY . .
+
 # 如果 package.json 或 yarn.lock 没有变动，则依赖安装步骤将被缓存
 RUN yarn install
-
-COPY . .
 
 RUN yarn just-build
 
