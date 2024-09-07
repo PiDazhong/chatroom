@@ -47,7 +47,10 @@ build_podman_image:
     paths:
       - node_modules/ # 缓存依赖，加速 yarn install
   script:
-    # 进入对应分支的目录并打包文件
+    # 确保目录存在
+    - mkdir -p $CI_COMMIT_REF_NAME
+
+    # 进入对应分支的目录
     - cd $CI_COMMIT_REF_NAME
 
     # 将 node-v21.1.0-linux-x64.tar.xz 文件复制到工作目录
@@ -56,15 +59,11 @@ build_podman_image:
     # 登录 GitLab 容器注册表
     - echo "$CI_REGISTRY_PASSWORD" | podman login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
-    # 构建镜像，使用调试模式
-    - podman build --log-level debug -t $IMAGE_TAG -f ./Dockerfile .
+    # 使用缓存加速构建镜像
+    - podman build -t $IMAGE_TAG -f ./Dockerfile .
 
-    # 推送镜像到注册表
+    # 推送镜像到 GitLab 容器注册表
     - podman push $IMAGE_TAG
-
-  artifacts:
-    paths:
-      - $IMAGE_TAG
   only:
     - master
     - /^v\d+\.\d+\.\d+$/
