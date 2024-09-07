@@ -29,6 +29,7 @@ lint:
       git pull origin $CI_COMMIT_REF_NAME;
       else git clone --branch $CI_COMMIT_REF_NAME ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git .;
       fi
+
   script:
     - yarn install
     - yarn lint
