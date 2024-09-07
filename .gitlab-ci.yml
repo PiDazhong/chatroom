@@ -47,9 +47,9 @@ build_podman_image:
   services:
     - docker:21.1.0-dind # GitLab CI/CD 可能仍需要 Docker 容器作为服务
   cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - node_modules/ # 缓存依赖，加速 yarn install
+    # key: ${CI_COMMIT_REF_SLUG}
+    # paths:
+    #  - node_modules/ # 缓存依赖，加速 yarn install
 
   script:
     # 确保目录存在
@@ -65,7 +65,7 @@ build_podman_image:
     - echo "$CI_REGISTRY_PASSWORD" | podman login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
 
     # 构建镜像，添加元数据信息
-    - podman build -t $IMAGE_TAG --label "commit_author=$CI_COMMIT_AUTHOR" --label "commit_ref_name=$CI_COMMIT_REF_NAME" --label "build_time=$(date)" -f ./Dockerfile .
+    - podman build  --no-cache -t $IMAGE_TAG --label "commit_author=$CI_COMMIT_AUTHOR" --label "commit_ref_name=$CI_COMMIT_REF_NAME" --label "build_time=$(date)" -f ./Dockerfile .
 
     # 推送镜像到 GitLab 容器注册表
     - podman push $IMAGE_TAG
