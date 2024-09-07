@@ -86,10 +86,11 @@ deploy_prod:
   script:
     # 在远程服务器上登录到 GitLab 容器注册表
     - ssh root@47.120.40.71 "echo '$CI_REGISTRY_PASSWORD' | podman login -u '$CI_REGISTRY_USER' --password-stdin $CI_REGISTRY"
-    # 远程查询镜像详情并验证镜像是否存在
+    # 拉取镜像并显示镜像列表验证拉取是否成功
     - ssh root@47.120.40.71 "
-      podman manifest inspect $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG && \
-      echo '镜像存在，显示其详情：' && \
+      podman pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG && \
+      echo '镜像拉取成功' && \
+      podman images | grep '$CI_REGISTRY_IMAGE' && \
       podman inspect $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG | jq '.[0].Config.Labels'"
   only:
     - master
