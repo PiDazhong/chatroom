@@ -17,46 +17,86 @@ build_and_deploy:
     - echo "当前执行的分支是：$CI_COMMIT_REF_NAME"
     # 优化 SSH 密钥和主机密钥添加
     - |
+      echo "检查 SSH 目录是否存在..."
       if [ ! -d ~/.ssh ]; then
+        echo "~/.ssh 目录不存在，正在创建..."
         mkdir -p ~/.ssh
+      else
+        echo "~/.ssh 目录已存在"
       fi
+
+      echo "启动 SSH agent 并添加私钥..."
       eval $(ssh-agent -s)
+      echo "添加 SSH 私钥"
       echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-      grep -q "^gitlab.quantanalysis.cn" ~/.ssh/known_hosts || ssh-keyscan -p 2222 gitlab.quantanalysis.cn >> ~/.ssh/known_hosts
+      echo "SSH 私钥添加成功"
+
+      echo "检查 known_hosts 中是否存在 gitlab.quantanalysis.cn 的密钥..."
+      if grep -q "^gitlab.quantanalysis.cn" ~/.ssh/known_hosts; then
+        echo "主机密钥已存在"
+      else
+        echo "主机密钥不存在，正在添加..."
+        ssh-keyscan -p 2222 gitlab.quantanalysis.cn >> ~/.ssh/known_hosts
+        echo "主机密钥已添加"
+      fi
 
     # 创建一个基于分支名的文件夹，并进入该文件夹
+    - echo "正在创建并进入分支名对应的目录：$CI_COMMIT_REF_NAME"
     - mkdir -p $CI_COMMIT_REF_NAME
     - cd $CI_COMMIT_REF_NAME
+    - echo "当前目录为 $(pwd)"
 
-    # 如果文件夹中没有代码，克隆，否则拉取更新
-    - if [ -d ".git" ]; then
-      git remote set-url origin ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git && git pull origin $CI_COMMIT_REF_NAME;
+    # 如果文件夹中没有代码，克隆，否则拉取更新，输出相关信息
+    - |
+      if [ -d ".git" ]; then
+        echo "Git 仓库已存在，设置远程仓库 URL 并拉取最新代码"
+        git remote set-url origin ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git
+        git pull origin $CI_COMMIT_REF_NAME
+        echo "代码更新完成"
       else
-      git clone --branch $CI_COMMIT_REF_NAME ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git .;
+        echo "Git 仓库不存在，正在克隆分支 $CI_COMMIT_REF_NAME 的代码"
+        git clone --branch $CI_COMMIT_REF_NAME ssh://git@gitlab.quantanalysis.cn:2222/chatroom/chatroom.git .
+        echo "代码克隆完成"
       fi
-  script:
-    # 所有分支 都执行版本锁定的安装，并都执行 lint
-    - yarn install --frozen-lockfile
-    - yarn lint
 
-    # 设置路径变量
+  script:
+    # 所有分支都执行版本锁定的安装，并都执行 lint
+    - echo "开始执行 yarn install --frozen-lockfile 来安装依赖"
+    - yarn install --frozen-lockfile
+    - echo "依赖安装完成"
+
+    - echo "开始执行 yarn lint 进行代码检查"
+    - yarn lint
+    - echo "代码检查完成"
+
+    # 设置当前分支在部署服务器上的路径变量
     - export DEPLOY_DIR="/encrypt/$CI_COMMIT_REF_NAME"
+    - echo "设置远程部署目录为 $DEPLOY_DIR"
 
     # 安装依赖并构建前端项目，只有 master 和 v 开头的分支才执行
     - |
       if [[ "$CI_COMMIT_REF_NAME" == "master" || "$CI_COMMIT_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        echo "当前分支 $CI_COMMIT_REF_NAME : 主分支或版本分支，执行编译和发布"
+        echo "当前分支 $CI_COMMIT_REF_NAME : 主分支或版本分支，开始执行编译和发布"
+
+        # 编译项目
+        echo "开始执行 yarn just-build 进行项目编译"
         yarn just-build
+        echo "项目编译完成"
+
 
         # 将打包文件名与分支名称关联
+        echo "开始将打包文件 chatroom_$CI_COMMIT_REF_NAME.tar.gz 进行归档"
         tar -czf chatroom_$CI_COMMIT_REF_NAME.tar.gz chatroom/
+        echo "打包文件 chatroom_$CI_COMMIT_REF_NAME.tar.gz 归档完成"
 
         # 远程操作：创建目录、传输文件、解压文件，合并 SSH 操作
+        echo "开始将打包文件传输并解压到远程服务器"
         ssh root@47.120.40.71 "mkdir -p $DEPLOY_DIR && tar -xzf - -C $DEPLOY_DIR" < chatroom_$CI_COMMIT_REF_NAME.tar.gz
+        echo "远程文件传输和解压完成"
+
       else
         echo "当前分支 $CI_COMMIT_REF_NAME : 非主分支或版本分支，跳过编译和发布"
       fi
-
   artifacts:
     paths:
       - $CI_COMMIT_REF_NAME/chatroom/
