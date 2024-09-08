@@ -124,6 +124,34 @@ rollback:
   variables:
     # 禁用默认的代码拉取
     GIT_STRATEGY: none
+  before_script:
+    # 显示当前分支名称
+    - echo "当前执行的分支是：$CI_COMMIT_REF_NAME"
+    # 优化 SSH 密钥和主机密钥添加
+    - |
+      echo "检查 SSH 目录是否存在..."
+      if [ ! -d ~/.ssh ]; then
+        echo "~/.ssh 目录不存在，正在创建..."
+        mkdir -p ~/.ssh
+      else
+        echo "~/.ssh 目录已存在"
+      fi
+
+      echo "启动 SSH agent 并添加私钥..."
+      eval $(ssh-agent -s)
+      echo "添加 SSH 私钥"
+      echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+      echo "SSH 私钥添加成功"
+
+      echo "检查 known_hosts 中是否存在 gitlab.quantanalysis.cn 的密钥..."
+      if grep -q "^gitlab.quantanalysis.cn" ~/.ssh/known_hosts; then
+        echo "主机密钥已存在"
+      else
+        echo "主机密钥不存在，正在添加..."
+        ssh-keyscan -p 2222 gitlab.quantanalysis.cn >> ~/.ssh/known_hosts
+        echo "主机密钥已添加"
+      fi
+
   script:
     - echo "开始执行回滚操作"
 
