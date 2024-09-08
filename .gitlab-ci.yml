@@ -73,6 +73,12 @@ build_and_deploy:
     - export DEPLOY_DIR="/encrypt/$CI_COMMIT_REF_NAME"
     - echo "设置远程部署目录为 $DEPLOY_DIR"
 
+    # 定义时间戳
+    - export TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+
+    # 获取构建人
+    - export BUILDER=${GITLAB_USER_NAME:-"unknown"}
+
     # 安装依赖并构建前端项目，只有 master 和 v 开头的分支才执行
     - |
       if [[ "$CI_COMMIT_REF_NAME" == "master" || "$CI_COMMIT_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
