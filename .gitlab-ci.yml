@@ -56,6 +56,7 @@ build_and_deploy:
       else
         echo "当前分支 $CI_COMMIT_REF_NAME : 非主分支或版本分支，跳过编译和发布"
       fi
+
   artifacts:
     paths:
       - $CI_COMMIT_REF_NAME/chatroom/
