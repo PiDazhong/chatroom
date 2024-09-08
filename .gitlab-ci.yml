@@ -121,6 +121,9 @@ build_and_deploy:
 # 回滚作业
 rollback:
   stage: rollback
+  variables:
+    # 禁用默认的代码拉取
+    GIT_STRATEGY: none
   script:
     - echo "开始执行回滚操作"
 
