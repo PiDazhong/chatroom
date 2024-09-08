@@ -100,6 +100,8 @@ build_and_deploy:
 
         # 远程操作：创建目录、传输文件、解压文件，合并 SSH 操作
         echo "开始将打包文件传输并解压到远程服务器"
+        # 创建远程目录，如果目录不存在则创建
+        ssh root@47.120.40.71 "mkdir -p $DEPLOY_DIR"
         scp $ARCHIVE_NAME root@47.120.40.71:$DEPLOY_DIR/
         ssh root@47.120.40.71 "unzip -o $DEPLOY_DIR/$ARCHIVE_NAME -d $DEPLOY_DIR"
         echo "远程文件传输和解压完成"
