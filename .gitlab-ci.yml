@@ -1,5 +1,6 @@
 stages:
   - pipeline
+  - rollback # 添加回滚阶段
 
 # 构建并部署前端项目（lint 通过且是 master 或 v 开头的分支时触发）
 build_and_deploy:
@@ -106,9 +107,31 @@ build_and_deploy:
         ssh root@47.120.40.71 "unzip -o $DEPLOY_DIR/$ARCHIVE_NAME -d $DEPLOY_DIR"
         echo "远程文件传输和解压完成"
 
+        # 将成功部署后的打包文件备份到远程目录（/backup）
+        ssh root@47.120.40.71 "mkdir -p /backup && cp $DEPLOY_DIR/$ARCHIVE_NAME /backup/"
+        echo "打包文件 $ARCHIVE_NAME 已备份到 /backup"
+
       else
         echo "当前分支 $CI_COMMIT_REF_NAME : 非主分支或版本分支，跳过编译和发布"
       fi
   artifacts:
     paths:
       - $CI_COMMIT_REF_NAME/chatroom/
+
+# 回滚作业
+rollback:
+  stage: rollback
+  script:
+    - echo "开始执行回滚操作"
+
+    # 检查是否提供了回滚的包名称
+    - if [ -z "$ROLLBACK_PACKAGE" ]; then echo "ERROR: 必须指定 ROLLBACK_PACKAGE 变量！" && exit 1; fi
+
+    # 打印回滚包信息
+    - echo "正在回滚到包 $ROLLBACK_PACKAGE"
+
+    # 从备份目录恢复
+    - ssh root@47.120.40.71 "unzip -o /backup/$ROLLBACK_PACKAGE -d $DEPLOY_DIR"
+
+    - echo "回滚完成"
+  when: manual # 手动触发回滚
