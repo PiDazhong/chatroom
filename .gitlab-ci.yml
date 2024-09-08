@@ -155,6 +155,10 @@ rollback:
   script:
     - echo "开始执行回滚操作"
 
+    # 设置当前分支在部署服务器上的路径变量
+    - export DEPLOY_DIR="/encrypt/$CI_COMMIT_REF_NAME"
+    - echo "设置远程部署目录为 $DEPLOY_DIR"
+
     # 检查是否提供了回滚的包名称
     - '[ -z "$ROLLBACK_PACKAGE" ] && echo "ERROR: 必须指定 ROLLBACK_PACKAGE 变量！" && exit 1 || echo "ROLLBACK_PACKAGE 变量已设置"'
 
