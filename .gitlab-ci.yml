@@ -83,15 +83,19 @@ build_and_deploy:
         yarn just-build
         echo "项目编译完成"
 
+        # 构建打包文件名
+        export ARCHIVE_NAME="chatroom_${CI_COMMIT_REF_NAME}_${TIMESTAMP}_${BUILDER}.zip"
+        echo "打包文件名称为 $ARCHIVE_NAME"
 
-        # 将打包文件名与分支名称关联
-        echo "开始将打包文件 chatroom_$CI_COMMIT_REF_NAME.tar.gz 进行归档"
-        tar -czf chatroom_$CI_COMMIT_REF_NAME.tar.gz chatroom/
-        echo "打包文件 chatroom_$CI_COMMIT_REF_NAME.tar.gz 归档完成"
+        # 将打包文件名与分支名称、时间、构建人关联
+        echo "开始将打包文件 $ARCHIVE_NAME 进行归档"
+        zip -r $ARCHIVE_NAME chatroom/
+        echo "打包文件 $ARCHIVE_NAME 归档完成"
 
         # 远程操作：创建目录、传输文件、解压文件，合并 SSH 操作
         echo "开始将打包文件传输并解压到远程服务器"
-        ssh root@47.120.40.71 "mkdir -p $DEPLOY_DIR && tar -xzf - -C $DEPLOY_DIR" < chatroom_$CI_COMMIT_REF_NAME.tar.gz
+        scp $ARCHIVE_NAME root@47.120.40.71:$DEPLOY_DIR/
+        ssh root@47.120.40.71 "unzip -o $DEPLOY_DIR/$ARCHIVE_NAME -d $DEPLOY_DIR"
         echo "远程文件传输和解压完成"
 
       else
