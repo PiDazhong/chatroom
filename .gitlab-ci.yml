@@ -125,7 +125,7 @@ rollback:
     - echo "开始执行回滚操作"
 
     # 检查是否提供了回滚的包名称
-    - if [ -z "$ROLLBACK_PACKAGE" ]; then echo "ERROR: 必须指定 ROLLBACK_PACKAGE 变量！" && exit 1; fi
+    - '[ -z "$ROLLBACK_PACKAGE" ] && echo "ERROR: 必须指定 ROLLBACK_PACKAGE 变量！" && exit 1 || echo "ROLLBACK_PACKAGE 变量已设置"'
 
     # 打印回滚包信息
     - echo "正在回滚到包 $ROLLBACK_PACKAGE"
@@ -134,4 +134,5 @@ rollback:
     - ssh root@47.120.40.71 "unzip -o /backup/$ROLLBACK_PACKAGE -d $DEPLOY_DIR"
 
     - echo "回滚完成"
+
   when: manual # 手动触发回滚
