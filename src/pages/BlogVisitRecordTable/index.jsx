@@ -23,7 +23,7 @@ const LogsTable = () => {
   const [loading, setLoading] = useState(false);
 
   // 表格的高度
-  const tableHeight = useElementHeight('log-table-card-el-card', true);
+  const tableHeight = useElementHeight('blog-table-card-el-card', true);
 
   const getTableListFilter = () => {
     return _.filter(tableList, (t) => {
