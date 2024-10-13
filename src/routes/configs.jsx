@@ -4,6 +4,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import LogsTable from 'pages/LogsTable';
+import BlogVisitRecordTable from 'pages/BlogVisitRecordTable';
 import Room from 'pages/Room';
 import Home from 'pages/index';
 
@@ -31,6 +32,12 @@ const getRouterConfigs = () => {
       name: '用户管理',
       path: '/logs',
       element: <LogsTable />,
+    },
+    {
+      key: 'blogVisitRecord',
+      name: '博客访问记录',
+      path: '/blogVisitRecord',
+      element: <BlogVisitRecordTable />,
     },
   ];
 };

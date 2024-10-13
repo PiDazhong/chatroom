@@ -415,7 +415,7 @@ router.get('/getLoginLog', async (req, res) => {
 });
 
 // 新增 博客 访问记录
-router.post('/pushBlogHistory', async (req, res) => {
+router.post('/saveBlogVisitRecord', async (req, res) => {
   try {
     const { info } = req.body;
     const { browser, os, device, path } = JSON.parse(info);
@@ -423,11 +423,18 @@ router.post('/pushBlogHistory', async (req, res) => {
 
     const nowTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
 
+    // 获取用户的真实 IP 地址
+    const ip =
+      req.headers['x-forwarded-for'] || // 获取代理后的真实 IP
+      req.connection.remoteAddress || // 获取远程客户端 IP
+      req.socket.remoteAddress || // 获取网络套接字的 IP
+      req.connection.socket.remoteAddress;
+
     await runSql(
       `insert into ${blogHistoryTable} 
-        (time, browser, os, device, path) 
+        (time, browser, os, device, path, ip) 
         values 
-        ('${nowTime}', '${browser}', '${os}', '${device}', '${path}')
+        ('${nowTime}', '${browser}', '${os}', '${device}', '${path}', '${ip}')
       `
     );
     res.send({
@@ -436,6 +443,23 @@ router.post('/pushBlogHistory', async (req, res) => {
   } catch (e) {
     res.send({
       error: '新增博客访问记录报错',
+    });
+  }
+});
+
+// 查询 博客访问记录
+router.get('/getBlogVisitRecord', async (req, res) => {
+  try {
+    const blogHistoryTable = `${DB_NAME}.blog_history_table`;
+    const querySql = `SELECT browser, os, device, path, time FROM ${blogHistoryTable} order by time desc limit 1000 `;
+    const result = await runSql(querySql);
+    res.send({
+      success: true,
+      data: result,
+    });
+  } catch (e) {
+    res.send({
+      error: '查询博客访问记录报错',
     });
   }
 });
