@@ -113,7 +113,7 @@ function setupWebSocket(server) {
     const newRoomIds = _.uniq([...roomIds, roomId]).join(',');
     const joinInMessage = `${user_name} 进入了房间`;
     await runSql(
-      `update ${userTable} set user_status='online', room_ids='${newRoomIds}' where user_id='${nickId}' `,
+      `update ${userTable} set user_status='online', room_ids='${newRoomIds}' where user_id='${nickId}' `
     );
     // 进入房间的信息也入库吧
     await runSql(
@@ -121,7 +121,7 @@ function setupWebSocket(server) {
         (log_id, log_content, log_time, log_room_id, log_room_name, log_user_id, log_user_name) 
         values 
         ('${now}', '${joinInMessage}', '${nowTime}', '${roomId}', '${roomName}', '${nickId}', 'system')
-      `,
+      `
     );
     const onlineMembers = await getOnlineMembersByRoomId(roomId);
     broadcastToRoom(
@@ -140,7 +140,7 @@ function setupWebSocket(server) {
           type: 'members',
           data: onlineMembers,
         },
-      ]),
+      ])
     );
 
     // 监听客户端发送的消息
@@ -165,7 +165,7 @@ function setupWebSocket(server) {
             (log_id, log_content, log_time, log_room_id, log_room_name, log_user_id, log_user_name) 
             values 
             ('${sendTimeNow}', '${content}', '${sendTime}', '${sendRoomId}', '${sendRoomName}', '${sendUserId}', '${sendUserName}')
-          `,
+          `
         );
         // 广播消息给同一房间的其他客户端
         broadcastToRoom(
@@ -179,7 +179,7 @@ function setupWebSocket(server) {
                 log_time: sendTime,
               },
             },
-          ]),
+          ])
         );
       }
       // 如果是请求最近的200条聊天记录
@@ -193,7 +193,7 @@ function setupWebSocket(server) {
               type: 'logs',
               data: logs,
             },
-          ]),
+          ])
         );
       }
 
@@ -219,7 +219,7 @@ function setupWebSocket(server) {
 
       const exitMessage = `${user_name} 离开了房间`;
       await runSql(
-        `update ${userTable} set user_status='${user_status}',room_ids='${newRoomIdsExitStr}' where user_id='${nickId}' `,
+        `update ${userTable} set user_status='${user_status}',room_ids='${newRoomIdsExitStr}' where user_id='${nickId}' `
       );
       // 离开房间的信息也入库吧
       await runSql(
@@ -227,7 +227,7 @@ function setupWebSocket(server) {
         (log_id, log_content, log_time, log_room_id, log_room_name, log_user_id, log_user_name) 
         values 
         ('${exitTimeNow}', '${exitMessage}', '${exitTime}', '${roomId}', '${roomName}', '${nickId}', 'system')
-      `,
+      `
       );
       const onlineMembers = await getOnlineMembersByRoomId(roomId);
       // 告诉大家 xxx 离开了房间
@@ -247,7 +247,7 @@ function setupWebSocket(server) {
             type: 'members',
             data: onlineMembers,
           },
-        ]),
+        ])
       );
     });
   });
@@ -292,7 +292,7 @@ router.post('/createChatroom', async (req, res) => {
     await insertOrUpdateAfterQuery(
       `select 1 from ${roomTable} where room_name='${chatroomName}'`,
       `update ${roomTable} set room_status='active' where room_name='${chatroomName}'`,
-      `insert into ${roomTable} (room_id, room_name, room_status, create_time) values ('${room_id}', '${chatroomName}', 'active', '${nowTime}')`,
+      `insert into ${roomTable} (room_id, room_name, room_status, create_time) values ('${room_id}', '${chatroomName}', 'active', '${nowTime}')`
     );
 
     // 查询当前用户活跃的房间
@@ -306,7 +306,7 @@ router.post('/createChatroom', async (req, res) => {
     await insertOrUpdateAfterQuery(
       `select 1 from ${userTable} where user_name='${nickName}'`,
       `update ${userTable} set user_status='online',room_ids='${newRoomIds}',head_num='${headNum}' where user_name='${nickName}'`,
-      `insert into ${userTable} (user_id, user_name, user_status, create_time, room_ids, head_num) values ('${user_id}', '${nickName}', 'online', '${nowTime}', '${newRoomIds}', '${headNum}')`,
+      `insert into ${userTable} (user_id, user_name, user_status, create_time, room_ids, head_num) values ('${user_id}', '${nickName}', 'online', '${nowTime}', '${newRoomIds}', '${headNum}')`
     );
 
     // room_id
@@ -410,6 +410,32 @@ router.get('/getLoginLog', async (req, res) => {
   } catch (e) {
     res.send({
       error: '查询报错',
+    });
+  }
+});
+
+// 新增 博客 访问记录
+router.post('/pushBlogHistory', async (req, res) => {
+  try {
+    const { info } = req.body;
+    const { browser, os, device, path } = JSON.parse(info);
+    const blogHistoryTable = `${DB_NAME}.blog_history_table`;
+
+    const nowTime = dayjs().format('YYYY-MM-DD HH:mm:ss');
+
+    await runSql(
+      `insert into ${blogHistoryTable} 
+        (time, browser, os, device, path) 
+        values 
+        ('${nowTime}', '${browser}', '${os}', '${device}', '${path}')
+      `
+    );
+    res.send({
+      success: true,
+    });
+  } catch (e) {
+    res.send({
+      error: '新增博客访问记录报错',
     });
   }
 });
