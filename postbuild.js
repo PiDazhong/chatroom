@@ -135,7 +135,7 @@ const remoteZipPath = '/etc/nginx/html/chatroom.zip';
 const remoteDirPath = '/etc/nginx/html/chatroom';
 
 const sshConfigStr = fs.readFileSync(
-  '/Users/ming/Downloads/ssh/sshConfig.json',
+  '/Users/xiaopiqaq/myProject/ssh/sshConfig.json',
   'utf8',
 );
 const sshConfig = JSON.parse(sshConfigStr);
