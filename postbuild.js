@@ -46,7 +46,7 @@ const uploadAndExtract = (
   remoteZipPath,
   remoteDirPath,
   sshConfig,
-  retries = 1,
+  retries = 1
 ) => {
   return new Promise((resolve, reject) => {
     const attemptUpload = (retryCount) => {
@@ -135,8 +135,8 @@ const remoteZipPath = '/etc/nginx/html/chatroom.zip';
 const remoteDirPath = '/etc/nginx/html/chatroom';
 
 const sshConfigStr = fs.readFileSync(
-  '/Users/ming/Downloads/ssh/sshConfig.json',
-  'utf8',
+  '/Users/ming/Downloads/pidz/ssh/sshConfig.json',
+  'utf8'
 );
 const sshConfig = JSON.parse(sshConfigStr);
 
@@ -144,7 +144,7 @@ const sshConfig = JSON.parse(sshConfigStr);
 const main = async () => {
   try {
     console.log(
-      '--------------------------------------------------------------------------',
+      '--------------------------------------------------------------------------'
     );
     console.log('正在打包构建产物...');
     await archiveBuild(buildDir, outputPath);
@@ -156,7 +156,7 @@ const main = async () => {
       fs.unlinkSync(outputPath);
     }
     console.log(
-      '--------------------------------------------------------------------------',
+      '--------------------------------------------------------------------------'
     );
   } catch (error) {
     console.error('操作失败:', error);

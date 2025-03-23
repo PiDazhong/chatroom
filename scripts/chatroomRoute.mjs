@@ -464,4 +464,74 @@ router.get('/getBlogVisitRecord', async (req, res) => {
   }
 });
 
+// 查询 摩托日志
+router.post('/getMotoLog', async (req, res) => {
+  const { curMoto } = req.body;
+  try {
+    const motoLogTable = `${DB_NAME}.moto_cost_table`;
+    const curMotoFilter = curMoto ? `and moto_id='${curMoto}'` : '';
+    const querySql = `
+      SELECT * 
+      FROM ${motoLogTable} 
+      where 1=1
+      ${curMotoFilter}
+      order by time limit 1000 
+    `;
+    const result = await runSql(querySql);
+    res.send({
+      success: true,
+      data: result,
+    });
+  } catch (e) {
+    res.send({
+      error: '查询摩托日志报错',
+    });
+  }
+});
+
+// 查询 摩托日志
+router.post('/addMotoLog', async (req, res) => {
+  const { curMoto, total_mile, cost } = req.body;
+  try {
+    const motoLogTable = `${DB_NAME}.moto_cost_table`;
+    // 查询上次当前摩托的最大值
+    const querySql = `select * from ${motoLogTable} where moto_id='${curMoto}' order by time desc limit 1`;
+    const lastLog = (await runSql(querySql))[0] || {
+      total_mile: 0,
+      total_cost: 0,
+    };
+    const { total_mile: lastTotalMile, total_cost: lastTotalCost } = lastLog;
+    const mile = Number(total_mile) - Number(lastTotalMile);
+    const totalCost = Number(lastTotalCost) + Number(cost);
+    const time = dayjs().format('YYYY-MM-DD HH:mm:ss');
+    const timestamp = dayjs().valueOf();
+
+    console.log('ttt', {
+      curMoto,
+      total_mile,
+      cost,
+      lastLog,
+      lastTotalMile,
+      mile,
+      lastTotalCost,
+      totalCost,
+      timestamp,
+    });
+    const addSql = `
+      insert into ${motoLogTable} 
+      (id, moto_name, moto_id, cost, total_cost, mile, total_mile, time) 
+      values 
+      ('${timestamp}', '${curMoto}', '${curMoto}', ${cost}, ${totalCost}, ${mile}, ${total_mile}, '${time}')
+    `;
+    await runSql(addSql);
+    res.send({
+      success: true,
+    });
+  } catch (e) {
+    res.send({
+      error: '新增日志报错',
+    });
+  }
+});
+
 export { setupWebSocket, router };

@@ -5,6 +5,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import LogsTable from 'pages/LogsTable';
 import BlogVisitRecordTable from 'pages/BlogVisitRecordTable';
+import MotoLogTable from 'pages/MotoLogTable';
 import Room from 'pages/Room';
 import Home from 'pages/index';
 
@@ -38,6 +39,12 @@ const getRouterConfigs = () => {
       name: '博客访问记录',
       path: '/blogVisitRecord',
       element: <BlogVisitRecordTable />,
+    },
+    {
+      key: 'moto',
+      name: '摩托记录',
+      path: '/moto',
+      element: <MotoLogTable />,
     },
   ];
 };

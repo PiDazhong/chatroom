@@ -29,8 +29,8 @@ const checkCommitChanges = (filepaths) => {
 };
 
 const sshConfigStr = fs.readFileSync(
-  '/Users/ming/Downloads/ssh/sshConfig.json',
-  'utf8',
+  '/Users/ming/Downloads/pidz/ssh/sshConfig.json',
+  'utf8'
 );
 const sshConfig = JSON.parse(sshConfigStr);
 
@@ -78,7 +78,7 @@ const uploadAndExecute = async (localPaths, remotePath, sshConfig, execute) => {
                 console.log(
                   `文件上传成功: ${pathItem.padEnd(30, ' ')}大小: ${fileSize
                     .toString()
-                    .padEnd(6, ' ')}KB      行数: ${lines}`,
+                    .padEnd(6, ' ')}KB      行数: ${lines}`
                 );
                 uploadCount++;
 
@@ -144,7 +144,7 @@ const main = async () => {
         sqlServicePaths,
         remoteSqlPath,
         sshConfig,
-        remoteSqlExecute,
+        remoteSqlExecute
       );
       console.log('上传文件并执行 sqlService 重启命令完成\n');
     } else {
@@ -152,7 +152,7 @@ const main = async () => {
     }
     console.log('全部任务执行完成!!!');
     console.log(
-      '--------------------------------------------------------------------------',
+      '--------------------------------------------------------------------------'
     );
   } catch (error) {
     console.error('操作失败:', error);
