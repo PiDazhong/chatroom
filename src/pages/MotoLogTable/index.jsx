@@ -68,18 +68,7 @@ const MotoLogTable = () => {
         ),
       },
       {
-        width: 200,
-        key: 'time',
-        title: '时间',
-        dataIndex: 'time',
-        render: (text, record) => (
-          <div className="bk-name-line">
-            <Abbr text={text} />
-          </div>
-        ),
-      },
-      {
-        width: 120,
+        width: 80,
         key: 'mile',
         title: '此次里程',
         dataIndex: 'mile',
@@ -90,7 +79,7 @@ const MotoLogTable = () => {
         ),
       },
       {
-        width: 120,
+        width: 80,
         key: 'cost',
         title: '此次消费',
         dataIndex: 'cost',
@@ -101,23 +90,34 @@ const MotoLogTable = () => {
         ),
       },
       {
-        width: 120,
+        width: 80,
         key: 'total_mile',
         title: '总里程',
         dataIndex: 'total_mile',
         render: (text, record) => (
-          <div className="mile-code-line">
+          <div className="mile-name-line">
             <Abbr text={text} />
           </div>
         ),
       },
       {
-        width: 120,
+        width: 80,
         key: 'total_cost',
         title: '总消费',
         dataIndex: 'total_cost',
         render: (text, record) => (
           <div className="cost-name-line">
+            <Abbr text={text} />
+          </div>
+        ),
+      },
+      {
+        width: 200,
+        key: 'time',
+        title: '时间',
+        dataIndex: 'time',
+        render: (text, record) => (
+          <div className="bk-name-line">
             <Abbr text={text} />
           </div>
         ),
