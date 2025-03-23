@@ -91,6 +91,26 @@
         padding: 0 12px;
       }
 
+      .mile-name-line {
+        font-weight: 500;
+        color: var(--greenblue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        padding: 0 12px;
+      }
+
+      .cost-name-line {
+        font-weight: 500;
+        color: var(--brand);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        padding: 0 12px;
+      }
+
       .bk-code-line {
         font-weight: 400;
         color: var(--black65);

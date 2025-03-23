@@ -53,7 +53,7 @@ const MotoLogTable = () => {
   };
 
   useEffect(() => {
-    handleGetTableList();
+    handleGetTableList(curMoto);
   }, []);
 
   const getColumns = () => {
@@ -106,7 +106,7 @@ const MotoLogTable = () => {
         title: '总里程',
         dataIndex: 'total_mile',
         render: (text, record) => (
-          <div className="bk-code-line">
+          <div className="mile-code-line">
             <Abbr text={text} />
           </div>
         ),
@@ -117,7 +117,7 @@ const MotoLogTable = () => {
         title: '总消费',
         dataIndex: 'total_cost',
         render: (text, record) => (
-          <div className="bk-name-line">
+          <div className="cost-name-line">
             <Abbr text={text} />
           </div>
         ),
